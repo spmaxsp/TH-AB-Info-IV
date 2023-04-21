@@ -10,6 +10,12 @@ Ziel des Spiels ist es ein Moving-Head Scheinwerfer über Biosensoren zu steuern
  - src - Sourcecode des Project
  - libs - verwendete libaries
 
+## Branch Namen
+
+Branches werden nach folgendem Muster benannt:
+
+    <Name>/<was-wurde-gemeacht(am besten wie Jira-Task)>
+
 ## Einrichtung der Entwicklungsumgebung
 
 Für das Projekt wird VS-Code und MSYS2 verwendet.
