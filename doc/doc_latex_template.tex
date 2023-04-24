@@ -1,0 +1,111 @@
+\def\projectname{$<$Project$>$}
+\def\documentname{$<$Document$>$}
+
+\def\authors{Ayberk Tuzcuoglu\\ Julian Emrich\\ Maximilian Spahn\\ Till Wolf}
+
+\def\docversion{1.0 }
+\def\docstatus{under construction} %(Status: = planned, under construction, presented, accepted)
+
+\documentclass[a4paper]{scrreprt}
+
+\usepackage{underscore}
+\usepackage{hyperref}
+\usepackage{lastpage}
+\usepackage{scrlayer-scrpage}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+\hypersetup{
+    bookmarks=false,
+    pdftitle={\projectname - \documentname},
+    pdfauthor={\authors},
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=black,
+    filecolor=black,
+    urlcolor=purple,
+    linktoc=page
+}
+
+\rofoot*{}
+\cofoot*{\thepage\ of {\hypersetup{linkcolor=black}\pageref{LastPage}}}
+\pagestyle{scrheadings}
+
+\begin{document}
+\sffamily
+
+\begin{titlepage}
+	\begin{flushleft}
+		\begin{LARGE}
+			UNIVERSITY OF APPLIED SCIENCES \\ ASCHAFFENBURG
+		\end{LARGE}
+	\end{flushleft}
+
+	\rule{15cm}{5pt}\vskip1cm
+
+	\begin{flushright}
+		\begin{bfseries}
+			\begin{Huge}
+				\documentname\\
+				\vspace{1.4cm}
+				for\\
+				\vspace{1.4cm}
+				\projectname\\
+			\end{Huge}
+
+			\vspace{1.2cm}
+
+			\begin{Large}
+				Version \docversion \docstatus\\
+			\end{Large}
+		\end{bfseries}
+
+		\vspace{2.2cm}
+
+		\begin{Large}
+			\begin{bfseries}
+				Authors: \\
+			\end{bfseries}
+			\authors\\
+		\end{Large}
+		
+		\vspace{1.5cm}
+
+		\begin{bfseries} 
+			\today\\ 
+		\end{bfseries}
+
+		\vspace{0.5cm}
+
+		\small \bfseries{Documentname:}\\ \mdseries \textit{\jobname .tex}
+	\end{flushright}
+\end{titlepage}
+
+\tableofcontents
+
+\listoffigures
+
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Name & Date & Reason For Changes & Version\\
+        \hline
+	    21 & 22 & 23 & 24\\
+        \hline
+	    31 & 32 & 33 & 34\\
+        \hline
+    \end{tabular}
+\end{center}
+
+\chapter{$<$Chapter$>$}
+sample text
+
+\section{$<$Section$>$}
+sample text
+
+\subsection{$<$Subsection$>$}
+sample text
+
+\end{document}
