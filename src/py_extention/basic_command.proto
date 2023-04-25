@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+message Command {
+  string command_name = 1;
+  repeated Argument arguments = 2;
+}
+
+message Argument {
+  oneof value {
+    string string_value = 1;
+    int64 int_value = 2;
+    double float_value = 3;
+    bytes binary_value = 4;
+  }
+  DataType data_type = 5;
+}
+
+enum DataType {
+  STRING = 0;
+  INT = 1;
+  FLOAT = 2;
+  BINARY = 3;
+}

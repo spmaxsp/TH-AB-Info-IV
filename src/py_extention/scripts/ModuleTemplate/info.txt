@@ -1,0 +1,4 @@
+port = 8080
+py_class = "Template"
+py_functions = "setup", "run", "end"
+proto_file = protocol.proto
