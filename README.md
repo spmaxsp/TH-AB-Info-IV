@@ -57,4 +57,6 @@ Dazu muss zuerst TexLive installiert werden: https://www.tug.org/texlive/acquire
 Als Editor kann einfach in VS-code das "LaTeX Workshop" plugin verwendet werden.
 Alternativ kann als editor "Texmarker" verwendet werden.
 
+Achtung: Um SVG Bilder in Latex zu verwenden muss das Pogramm "Inkscape" installiert werden.
+
 
