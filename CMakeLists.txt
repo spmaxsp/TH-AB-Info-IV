@@ -17,13 +17,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(SOURCE_FILES 
     src/main.cpp                            ### main file
 
-    src/py_extention/ExtentionManager.cpp   ### python extention manager
-
     src/py_extention/PyRunner.cpp           ### python runner
     src/py_extention/PyRunnerFunctions.cpp
 
     src/py_extention/websocket/SocketClient.cpp  ### socket client
-    src/py_extention/websocket/MultiSocket.cpp  ### socket server
 
     src/vulkan_base/vulkan_device.cpp       ### vulkan
 )
@@ -77,6 +74,6 @@ endif()
 
 ### copy Python scripts
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/src/py_extention/scripts/ ${PROJECT_SOURCE_DIR}/bin/scripts)
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/src/py_extention/modules/*.py ${PROJECT_SOURCE_DIR}/bin/scripts)
 
 
