@@ -73,7 +73,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 ### copy Python scripts
+file(GLOB_RECURSE PY_FILES ${PROJECT_SOURCE_DIR}/src/py_extention/modules/*.py)
+### display files
+message(STATUS "Python files: ${PY_FILES}")
+### copy files
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/src/py_extention/modules/*.py ${PROJECT_SOURCE_DIR}/bin/scripts)
-
+                    COMMAND ${CMAKE_COMMAND} -E copy ${PY_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
+                    COMMENT "Copying Python modules to scripts directory"
+                    VERBATIM
+                    ALWAYS)
 
