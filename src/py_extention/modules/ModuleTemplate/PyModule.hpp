@@ -1,33 +1,32 @@
+#pragma once
 
+#include "../../PyRunner.hpp"
 
-class PyModule
-{
+class PyModule {
     private:
-        PyInstance* instance;
-        int processId;
-        int port;
-        std::string name;
-        SoccketClient* client;
+        PythonRunner* runner;
+        int moduleIndex;
     public:
-        PyModule(std::string name, PyInstance* instance, int port);
-        ~PyModule();
-        void connect();
-        void disconnect();
-        void send(std::string message);
-        void recieve(std::string& message);
-        std::string getName();
-};
-
-
-class ModuleTemplate : public PyModule
-{
-    public:
-        ModuleTemplate(std::string name, PyInstance* instance, int port) : PyModule(name, instance, port) {}
-        ~ModuleTemplate() {}
-        void connect() {
-            PyModule::connect();
+        PyModule(PythonRunner* runner){
+            this->runner = runner;
+            this->moduleIndex = runner->LoadModule("PyModule");
         }
-        void disconnect() {
-            PyModule::disconnect();
+        ~PyModule(){
+            if (runner->getFunctionRunning(moduleIndex)){
+                runner->JoinProcess(moduleIndex);
+            }
+            runner->UnloadModule(moduleIndex);
+        }
+        void RunFunctionMain(){
+            runner->StartProcess(moduleIndex, "main", {});
+            runner->JoinProcess(moduleIndex);
+        }
+        void RunFunctionSomeFunction(){
+            runner->StartProcess(moduleIndex, "someFunction", {});
+            runner->JoinProcess(moduleIndex);
+        }
+        void RunFunctionSomeLoopingFunction(){
+            runner->StartProcess(moduleIndex, "someLoopingFunction", {});
         }
 };
+
