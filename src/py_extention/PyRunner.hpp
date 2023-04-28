@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdlib.h>
 #include "../BSlogger.hpp"
 #include <Python.h>
@@ -9,9 +11,7 @@
 struct RunFunctionParams {
     PyObject* PyClass;
     std::string function_name;
-    bool oneshot;
     std::vector<std::string> args;
-    std::shared_ptr<bool> stopSwitch;
     PyInterpreterState* interp;
 };
 
@@ -33,8 +33,6 @@ struct ModuleInfo {
     std::string loadedFunctionName;
     bool functionRunning;
 
-    std::shared_ptr<bool> stopSwitch;
-
     PyThreadState* PyThreadState;
 };
 
@@ -54,8 +52,8 @@ class PythonRunner {
         int LoadModule(std::string module_name);
         void UnloadModule(int moduleIndex);
 
-        void RunFunction(int moduleIndex, std::string function_name, std::vector<std::string> args, bool oneshot);
-        void StopFunction(int moduleIndex);
+        void StartProcess(int moduleIndex, std::string function_name, std::vector<std::string> args);
+        void JoinProcess(int moduleIndex);
 
         int getnumModules();
         int getModuleIndex(std::string module_name);

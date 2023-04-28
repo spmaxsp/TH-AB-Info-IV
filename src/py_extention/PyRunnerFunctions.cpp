@@ -77,23 +77,10 @@ void ActionRunFunction(std::shared_ptr<RunFunctionParams> params) {
         throw std::runtime_error("Failed to find function");
     }
 
-    log(LOG_DEBUG) << "Calling function (once)\n";
-    if (params->oneshot) {
-        PyObject* PyResult = PyObject_CallObject(PyFunction, PyArgs);
-        if (PyResult == nullptr) {
-            PyErr_Print();
-            throw std::runtime_error("Failed to call function");
-        }
-    }
-    else {
-        while (*params->stopSwitch) {
-            log(LOG_DEBUG) << "Calling function (loop)\n";
-            PyObject* PyResult = PyObject_CallObject(PyFunction, PyArgs);
-            if (PyResult == nullptr) {
-                PyErr_Print();
-                throw std::runtime_error("Failed to call function");
-            }
-        }
+    PyObject* PyResult = PyObject_CallObject(PyFunction, PyArgs);
+    if (PyResult == nullptr) {
+        PyErr_Print();
+        throw std::runtime_error("Failed to call function");
     }
 
     log(LOG_DEBUG) << "Cleaning up\n";
