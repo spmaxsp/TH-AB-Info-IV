@@ -1,5 +1,5 @@
 import time
-from Shimmersensor_pb2 import datapacket 
+import Shimmersensor_pb2
 
 from serial import Serial
 
@@ -33,6 +33,17 @@ if __name__ == '__main__':
     shim_dev.shutdown()
     input()
 
-    
+class ShimmerData:
+    def __init__(self, accel_x=0.0):
+        self.data = Shimmersensor_pb2.ShimmerData()
+        self.data.accel.x = accel_x
 
+def serialize(self):
+        return self.data.SerializeToString()  
+
+def deserialize(self, data):
+        self.data.ParseFromString(data)  
+
+ def set_values(self, accel_x):
+        self.data.accel.x = cur_value
 
