@@ -6,8 +6,8 @@
 //
 PythonRunner::PythonRunner() {
     //initialize python
-    Py_InitializeEx(1);
-    PyEval_InitThreads();
+    Py_InitializeEx(0);
+    //PyEval_InitThreads();
 
     //add current directory to python path
     PyRun_SimpleString("import sys");
@@ -23,9 +23,6 @@ PythonRunner::PythonRunner() {
 //                   Restores main thread state and deletes all modules
 //
 PythonRunner::~PythonRunner() {
-    //restore main thread state
-    PyEval_RestoreThread(mainThreadState);
-
     //delete all modules
     Py_Finalize();
 }
