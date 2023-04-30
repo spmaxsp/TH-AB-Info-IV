@@ -22,6 +22,8 @@ set(SOURCE_FILES
 
     src/py_extention/websocket/SocketClient.cpp  ### socket client
 
+    src/py_extention/modules/ModuleTemplate/proto/PyModuleProt.pb.cc  ### protobuf
+
     src/vulkan_base/vulkan_device.cpp       ### vulkan
 )
 
@@ -59,6 +61,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 else()
     target_link_libraries(${PROJECT_NAME} socket)
 endif()
+
+### include protobuf
+find_package(Protobuf REQUIRED)
+target_link_libraries(${PROJECT_NAME} ${Protobuf_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PRIVATE ${Protobuf_INCLUDE_DIRS})
 
 #################### COMPILE OPTIONS ####################
 

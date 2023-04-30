@@ -1,6 +1,8 @@
 import time 
 import socket
 
+import scripts.PyModuleProt_pb2 as proto
+
 HOST = '127.0.0.1'        # Local host
 PORT = 50007              # Arbitrary port
 
@@ -44,7 +46,9 @@ class PyModule:
         self.conn, self.addr = self.sock.accept()
 
     def serverSendData(self):
-        self.conn.sendall(b'Hello, world')
+        pb = proto.DataPacket()
+        pb.some_sensor = 1234
+        self.conn.sendall(pb.SerializeToString())
         print('Test data sent.')
 
     def stopServer(self):

@@ -3,6 +3,8 @@
 
 #include "../../../BSlogger.hpp"
 
+#include "proto/PyModuleProt.pb.h"
+
 #include <string>
 
 class PyModule {
@@ -73,7 +75,9 @@ class PyModule {
             log(LOG_INFO) << "Getting data\n";
             std::string data;
             client.sockRecv(data);
-            log(LOG_INFO) << "Data: " << data << "\n";
+            PyModuleProt::DataPacket pb;
+            pb.ParseFromString(data);
+            log(LOG_INFO) << "Data: " << pb.some_sensor() << "\n";
         }
 
         void RunStopServer(){
