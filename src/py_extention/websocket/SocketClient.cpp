@@ -80,6 +80,14 @@ int SocketClient::sockSend(const std::string& message){
     return send(sock, message.c_str(), message.length(), 0);
 }
 
+int SocketClient::sockRecv(std::string& message){
+    char buffer[1024];
+    memset(&buffer, 0, sizeof(buffer));
+    int status = recv(sock, buffer, sizeof(buffer), 0);
+    message = buffer;
+    return status;
+}
+
 int SocketClient::sockDisconnect(void){
     return sockClose();
 }

@@ -30,5 +30,6 @@ public:
 
     int sockConnect();
     int sockSend(const std::string& message);
+    int sockRecv(std::string& message);
     int sockDisconnect(void);
 };
