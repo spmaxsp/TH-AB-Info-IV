@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package shimmer;
+
+message DataPacket {
+  int32 accel_ln_x = 1;
+}
