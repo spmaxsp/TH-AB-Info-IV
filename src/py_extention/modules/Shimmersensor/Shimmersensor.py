@@ -5,12 +5,12 @@ from serial import Serial
 
 from pyshimmer import ShimmerBluetooth, DEFAULT_BAUDRATE, DataPacket, EChannelType
 
-
-def handler(pkt: DataPacket) -> None:
+class Shimmersensor: 
+    def handler(pkt: DataPacket) -> None:
     cur_value = pkt[EChannelType.ACCEL_LN_X]
     print(cur_value)
 
-def starteSensor():
+    def starteSensor():
     serial = Serial('COM5', DEFAULT_BAUDRATE)
     shim_dev = ShimmerBluetooth(serial)
 
