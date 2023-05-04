@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../../PyRunner.hpp"
 #include "../../websocket/SocketClient.hpp"
 

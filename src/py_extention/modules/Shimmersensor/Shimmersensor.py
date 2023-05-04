@@ -1,11 +1,12 @@
 import time
-import scripts.Shimmersensorptot_pb2 as proto
+import scripts.ShimmersensorProt_pb2 as proto
 
 from serial import Serial
 
 from pyshimmer import ShimmerBluetooth, DEFAULT_BAUDRATE, DataPacket, EChannelType
 
-
+HOST = '127.0.0.1'        # Local host
+PORT = 50008              # Arbitrary port
 
 class Shimmersensor: 
     shim_dev = None
@@ -14,14 +15,14 @@ class Shimmersensor:
     addr = None
     pb = None
 
-    def Handler(pkt: DataPacket) -> None:
+    def Handler(self, pkt: DataPacket) -> None:
         cur_value = pkt[EChannelType.ACCEL_LN_X]
         print(cur_value)
         pb.accel_ln_x = cur_value
         self.conn.sendall(pb.SerializeToString())
         print('Test data sent.')
 
-    def StarteSensor():
+    def StarteSensor(self):
         serial = Serial('COM5', DEFAULT_BAUDRATE)
         shim_dev = ShimmerBluetooth(serial)
 
@@ -35,7 +36,7 @@ class Shimmersensor:
         shim_dev.start_streaming()
 
 
-    def StoppeSensor():
+    def StoppeSensor(self):
         shim_dev.stop_streaming()
         shim_dev.shutdown()
 
