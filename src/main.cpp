@@ -7,8 +7,10 @@
 
 #include "BSlogger.hpp"
 
-#include "py_extention/PyRunner.hpp"
+//#include "py_extention/PyRunner.hpp"
+#include "py_extention/PyShellExec.hpp"
 #include "py_extention/modules/ModuleTemplate/PyModule.hpp"
+//#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
 
 #include <Windows.h>
 
@@ -16,37 +18,27 @@ int main(int argc, char *argv[]) {
     // Initializing logger
     LOG_INIT_CERR();
     
-    // Creating PyRunner
-    PythonRunner runner;
+    log(LOG_INFO) << "Loading module\n";
+    PyModule module;
+    PyModule module2;
 
-    // Loading PyModule
-    PyModule module(&runner);
+    log(LOG_INFO) << "Running module\n";
+    module.run();
+    Sleep(1000);
+    module2.run();
 
-    // Running Some simple test functions
-    module.RunFunctionMain();
-    module.RunFunctionSomeFunction();
+    Sleep(10000);
 
-    module.RunFunctionTestGlobalVariable();
+    log(LOG_INFO) << "Connecting module\n";
+    module.connect();
 
+    log(LOG_INFO) << "Reading data\n";
+    module.readData();
 
-    // Testing the server and client
-    module.RunStartServer();
-
-    Sleep(2000);
-
-    module.RunSendData();
-    module.getServerData();
-
-    module.RunStopServer();
-
-
-    // Testing the looping function
-    module.RunFunctionSomeLoopingFunction();
-
-    for(int i = 0; i < 10; i++){
-        log(LOG_INFO) << "Looping\n";
-        Sleep(1000);
-    }
+    log(LOG_INFO) << "Done\n";
+    module.stop();
+    module2.stop();
+    log(LOG_INFO) << "Stopped\n";
 
     return 0;
 }

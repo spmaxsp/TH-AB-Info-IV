@@ -1,7 +1,13 @@
 import time 
 import socket
 
-import scripts.PyModuleProt_pb2 as proto
+import PyModuleProt_pb2 as proto
+
+import os
+import sys
+
+# Add the path to the module to the system path
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 HOST = '127.0.0.1'        # Local host
 PORT = 50007              # Arbitrary port
@@ -54,3 +60,16 @@ class PyModule:
     def stopServer(self):
         self.conn.close()
         print ('Server closed.')
+
+if __name__ == "__main__":
+    pyModule = PyModule()
+    pyModule.main()
+    pyModule.someFunction()
+    pyModule.someLoopingFunction()
+    pyModule.testGlobalVariable1()
+    pyModule.testGlobalVariable2()
+    #pyModule.startServer()
+    #pyModule.serverWaitConnection()
+    #pyModule.serverSendData()
+    #time.sleep(10)
+    #pyModule.stopServer()

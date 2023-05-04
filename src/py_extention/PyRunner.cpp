@@ -1,18 +1,33 @@
 #include "PyRunner.hpp"
 
+/**********************
+
 //
 //  PythonRunner(): Constructor for PythonRunner:
 //                  Initializes Python and saves main thread state
 //
+
+static void * wrap_import_array() { import_array(); }
+
 PythonRunner::PythonRunner() {
     //initialize python
     Py_InitializeEx(0);
     //PyEval_InitThreads();
 
+    wrap_import_array();
+
     //add current directory to python path
     PyRun_SimpleString("import sys");
     PyRun_SimpleString("import os");
+    import_ufunc();
+    PyRun_SimpleString("import numpy");
     PyRun_SimpleString("sys.path.append(os.getcwd())");
+
+    //wrap_import_array();
+    //
+
+    PyRun_SimpleString("import numpy");
+    PyRun_SimpleString("import pyshimmer");
 
     //save main thread state
     this->mainThreadState = PyEval_SaveThread();
@@ -344,3 +359,6 @@ bool PythonRunner::checkFunctionExists(std::string module_name, std::string func
         }
     }
 }
+
+
+**********************/

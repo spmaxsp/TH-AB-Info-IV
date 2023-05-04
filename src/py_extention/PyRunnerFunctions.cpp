@@ -1,5 +1,7 @@
 #include "PyRunner.hpp"
 
+/**********************
+
 void ActionLoadModule(std::shared_ptr<LoadModuleParams> module_params) {
     PyThreadState* _state = PyThreadState_New(module_params->interp);
 
@@ -10,6 +12,8 @@ void ActionLoadModule(std::shared_ptr<LoadModuleParams> module_params) {
     PyEval_AcquireThread(_state);
 
     PyThreadState* _swap = PyThreadState_Swap(_state);
+
+    //wrap_import_array();
 
     std::string module_path = "scripts." + module_params->module_name;
     PyObject* PyModule = PyImport_ImportModule(module_path.c_str());
@@ -51,6 +55,8 @@ void ActionRunFunction(std::shared_ptr<RunFunctionParams> params) {
     PyEval_AcquireThread(_state);
     PyThreadState* _swap = PyThreadState_Swap(_state);
 
+    //wrap_import_array();
+
     PyObject* PyArgs = PyTuple_New(params->args.size() + 1);
     if (PyArgs == nullptr) {
         PyErr_Print();
@@ -85,3 +91,5 @@ void ActionRunFunction(std::shared_ptr<RunFunctionParams> params) {
     PyThreadState_Swap(_swap);
     PyEval_ReleaseThread(_state);
 } 
+
+**********************/

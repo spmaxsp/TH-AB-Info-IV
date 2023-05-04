@@ -1,11 +1,28 @@
 #pragma once
 
+/**********************
+
 #include <stdlib.h>
 #include "../BSlogger.hpp"
 #include <Python.h>
 #include <thread>
 #include <fstream>
 #include <windows.h>
+
+// deal with crazy numpy 1.7.x api init procedure
+#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API__CPPY3_APP_TOKEN
+//#if !defined(INCLUDED_FROM_CPPY3_NUMPY_CPP)
+//    #define NO_IMPORT_ARRAY
+//#endif
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
+//#define NO_IMPORT_ARRAY
+
+// python2.7/dist-packages/numpy/core/include
+#include <numpy/arrayobject.h>
+#include <numpy/ufuncobject.h>
+
+//static void * wrap_import_array() { import_array(); }
 
 // Structs for passing data to threads
 struct RunFunctionParams {
@@ -65,3 +82,5 @@ class PythonRunner {
         bool checkModuleExists(std::string module_name);
         bool checkFunctionExists(std::string module_name, std::string function_name);
 };
+
+**********************/
