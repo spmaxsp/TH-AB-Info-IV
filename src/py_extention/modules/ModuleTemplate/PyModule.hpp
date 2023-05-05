@@ -23,5 +23,8 @@ class PyModule {
         
         void connect();
 
+        void startStream();
+        void stopStream();
+
         void readData();
 };

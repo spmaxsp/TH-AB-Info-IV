@@ -20,25 +20,33 @@ int main(int argc, char *argv[]) {
     
     log(LOG_INFO) << "Loading module\n";
     PyModule module;
-    PyModule module2;
 
     log(LOG_INFO) << "Running module\n";
     module.run();
-    Sleep(1000);
-    module2.run();
 
-    Sleep(10000);
+    Sleep(500);
 
-    log(LOG_INFO) << "Connecting module\n";
+    log(LOG_INFO) << "Connecting to module\n";
     module.connect();
 
-    log(LOG_INFO) << "Reading data\n";
-    module.readData();
+    Sleep(1000);
 
-    log(LOG_INFO) << "Done\n";
+    log(LOG_INFO) << "Starting stream\n";
+    module.startStream();
+
+    Sleep(500);
+
+    log(LOG_INFO) << "Reading data\n";
+    for (int i = 0; i < 20; i++) {
+        module.readData();
+        Sleep(1000);
+    }
+
+    log(LOG_INFO) << "Stopping stream\n";
+    module.stopStream();
+
+    log(LOG_INFO) << "Stopping module\n";
     module.stop();
-    module2.stop();
-    log(LOG_INFO) << "Stopped\n";
 
     return 0;
 }

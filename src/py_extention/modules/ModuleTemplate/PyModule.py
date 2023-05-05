@@ -1,5 +1,7 @@
-import time 
-import socket
+import asyncio
+import random
+
+from datetime import datetime
 
 import PyModuleProt_pb2 as proto
 
@@ -12,64 +14,57 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 HOST = '127.0.0.1'        # Local host
 PORT = 50007              # Arbitrary port
 
-class PyModule:
-    sock = None
-    conn = None
-    addr = None
+global streaming
+streaming = False
 
-    def __init__(self):
-        globalVariable = 0
+async def handle_client(reader, writer):
 
-    def main(self):
-        print("Hello World!")
-        time.sleep(2)
-        print("Goodbye World!")
+    addr = writer.get_extra_info('peername')
+    print(f"New client connected: {addr}")
+    
+    async def send_data():
+        global streaming
+        while True:
+            if streaming:
+                print("Sending data...")
+                pb = proto.DataPacket()
+                pb.state = proto.State.STATE_STREAMING
+                now = datetime.now()
+                pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                pb.some_sensor = random.randint(0, 100)
+                #print (pb.some_sensor)
+                writer.write(pb.SerializeToString())
+                await writer.drain()
+            await asyncio.sleep(1)
 
-    def someFunction(self):
-        print("This is a function in the module")
+    async def receive_data():
+        global streaming
+        while True:
+            data = await reader.read(1024)
+            if not data:
+                print(f"Client {addr} disconnected")
+                break
+            print(f"Received data from {addr}: {data.decode()}")
 
-    def someLoopingFunction(self):
-        for i in range(10):
-            print(i)
-            time.sleep(1)
+            pb = proto.SendCommand()
+            pb.ParseFromString(data)
 
-    def testGlobalVariable1(self):
-        self.globalVariable = 123
-        print("set global variable: " + str(self.globalVariable))
+            if pb.command == proto.Command.COMMAND_START_STREAM:
+                print("Starting stream...")
+                streaming = True
+            elif pb.command == proto.Command.COMMAND_STOP_STREAM:
+                print("Stopping stream...")
+                streaming = False
 
-    def testGlobalVariable2(self):
-        print("read global variable: " + str(self.globalVariable))
+    receive_task = asyncio.create_task(receive_data())
+    send_task = asyncio.create_task(send_data())
+    await asyncio.gather(receive_task, send_task)
 
-    def startServer(self):
-        print("Starting server...")
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind((HOST, PORT))
-        self.sock.listen(1)
-        print("Server started.")
+async def main():
+    server = await asyncio.start_server(handle_client, HOST, PORT)
+    async with server:
+        print("Server running on port " + str(PORT))
+        await server.serve_forever()
 
-    def serverWaitConnection(self):
-        print ('Waiting for connection...')
-        self.conn, self.addr = self.sock.accept()
+asyncio.run(main())
 
-    def serverSendData(self):
-        pb = proto.DataPacket()
-        pb.some_sensor = 1234
-        self.conn.sendall(pb.SerializeToString())
-        print('Test data sent.')
-
-    def stopServer(self):
-        self.conn.close()
-        print ('Server closed.')
-
-if __name__ == "__main__":
-    pyModule = PyModule()
-    pyModule.main()
-    pyModule.someFunction()
-    pyModule.someLoopingFunction()
-    pyModule.testGlobalVariable1()
-    pyModule.testGlobalVariable2()
-    #pyModule.startServer()
-    #pyModule.serverWaitConnection()
-    #pyModule.serverSendData()
-    #time.sleep(10)
-    #pyModule.stopServer()
