@@ -18,7 +18,6 @@ global streaming
 streaming = False
 
 async def handle_client(reader, writer):
-
     addr = writer.get_extra_info('peername')
     print(f"New client connected: {addr}")
     
@@ -33,17 +32,28 @@ async def handle_client(reader, writer):
                 pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
                 pb.some_sensor = random.randint(0, 100)
                 #print (pb.some_sensor)
-                writer.write(pb.SerializeToString())
-                await writer.drain()
+                try:
+                    writer.write(pb.SerializeToString())
+                    await writer.drain()
+                except ConnectionResetError:
+                    print(f"Client {addr} disconnected")
+                    break
             await asyncio.sleep(1)
 
     async def receive_data():
         global streaming
         while True:
-            data = await reader.read(1024)
-            if not data:
+            try:
+                data = await reader.read(1024)
+                if not data:
+                    print(f"Client {addr} disconnected")
+                    streaming = False
+                    break
+            except ConnectionResetError:
                 print(f"Client {addr} disconnected")
+                streaming = False
                 break
+
             print(f"Received data from {addr}: {data.decode()}")
 
             pb = proto.SendCommand()
