@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     Sleep(500);
 
     log(LOG_INFO) << "Reading data\n";
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 3; i++) {
         module.readData();
         Sleep(1000);
     }
