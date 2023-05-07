@@ -15,9 +15,9 @@ bool VulkanContext::CheckLayerSupport(std::vector<const char*> layers) {
 
     // Get list of available layers
     uint32_t layerCount;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    VKA(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
     std::vector<VkLayerProperties> availableLayers(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    VKA(vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data()));
     log(LOG_DEBUG) << "Available layers:\n";
     for (const auto& layerProperties : availableLayers) {
         log(LOG_DEBUG) << "Available layer: " << layerProperties.layerName << "\n";
@@ -52,9 +52,9 @@ bool VulkanContext::CheckExtensionSupport(std::vector<const char*> extensions) {
 
     // Get list of available extensions
     uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+    VKA(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr));
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
+    VKA(vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data()));
     log(LOG_DEBUG) << "Available extensions:\n";
     for (const auto& extensionProperties : availableExtensions) {
         log(LOG_DEBUG) << "Available extension: " << extensionProperties.extensionName << "\n";
@@ -79,24 +79,17 @@ bool VulkanContext::CheckExtensionSupport(std::vector<const char*> extensions) {
 }
 
 
-bool VulkanContext::InitInstance() {
+bool VulkanContext::InitInstance(std::vector<const char*> layers, std::vector<const char*> extensions) {
     LOG_INIT_CERR();
     // Init Vulkan instance
 
     // Validation layers
-    const std::vector<const char*> validationLayers = {
-        "VK_LAYER_KHRONOS_validation"
-    };
-    if (!CheckLayerSupport(validationLayers)) {
+    if (!CheckLayerSupport(layers)) {
         log(LOG_ERROR) << "Validation layers requested, but not available!\n";
         return false;
     }
 
     // Extensions
-    const std::vector<const char*> extensions = {
-        "VK_KHR_surface",
-        "VK_KHR_win32_surface"
-    };
     if (!CheckExtensionSupport(extensions)) {
         log(LOG_ERROR) << "Extensions requested, but not available!\n";
         return false;
@@ -115,13 +108,13 @@ bool VulkanContext::InitInstance() {
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
-    createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-    createInfo.ppEnabledLayerNames = validationLayers.data();
+    createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+    createInfo.ppEnabledLayerNames = layers.data();
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
 
     // Create instance
-    if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+    if(VK(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)) {
         return false;
     }
     return true;
@@ -133,13 +126,13 @@ bool VulkanContext::selectPhysicalDevice() {
 
     // Get list of available devices
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    VKA(vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr));
     if (deviceCount == 0) {
         log(LOG_ERROR) << "Failed to find GPUs with Vulkan support!\n";
         return false;
     }
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    VKA(vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data()));
 
     // Print list of available devices
     log(LOG_INFO) << "Found " << deviceCount << " devices\n";
@@ -151,19 +144,63 @@ bool VulkanContext::selectPhysicalDevice() {
 
     // Select first device
     physicalDevice = devices[0];
-    VkPhysicalDeviceProperties deviceProperties;
-    vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
-    log(LOG_INFO) << "Selected device: " << deviceProperties.deviceName << "\n";
+    vkGetPhysicalDeviceProperties(physicalDevice, &selectedDeviceProperties);
+    log(LOG_INFO) << "Selected device: " << selectedDeviceProperties.deviceName << "\n";
 
     return true;
 }
 
-VulkanContext::VulkanContext() {
+bool VulkanContext::createLogicalDevice(std::vector<const char*> device_extensions) {
+    // Get queue families
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+
+    // Find queue family with graphics support
+    uint32_t graphicsQueueIndex = 0;
+    for (uint32_t i = 0; i < queueFamilies.size(); i++) {
+        if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            graphicsQueueIndex = i;
+            break;
+        }
+    }
+
+    // Create queue info
+    float queuePriority = 1.0f;
+    VkDeviceQueueCreateInfo queueCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
+    queueCreateInfo.queueFamilyIndex = graphicsQueueIndex;
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    // Get Physical Device Features
+    VkPhysicalDeviceFeatures enabledFeatures = {};
+
+    // Create logical device info
+    VkDeviceCreateInfo deviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
+    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.enabledExtensionCount = device_extensions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = device_extensions.data();
+    deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
+
+    if (vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device) != VK_SUCCESS) {
+        return false;
+    }
+
+    // Get graphics queue
+    graphicsQueue.familyIndex = graphicsQueueIndex;
+    VK(vkGetDeviceQueue(device, graphicsQueueIndex, 0, &graphicsQueue.queue));
+
+    return true;
+}
+
+VulkanContext::VulkanContext(std::vector<const char*> layers, std::vector<const char*> extensions, std::vector<const char*> device_extensions) {
     LOG_INIT_CERR();
 
     // Create Vulkan instance
     log(LOG_INFO) << "Initializing Vulkan Instance\n";
-    if (!InitInstance()) {
+    if (!InitInstance(layers, extensions)) {
         log(LOG_ERROR) << "Failed to init Vulkan instance\n";
     }
 
@@ -172,4 +209,17 @@ VulkanContext::VulkanContext() {
     if (!selectPhysicalDevice()) {
         log(LOG_ERROR) << "Failed to select physical device\n";
     }
+
+    // Create logical device
+    log(LOG_INFO) << "Creating logical device\n";
+    if (!createLogicalDevice(device_extensions)) {
+        log(LOG_ERROR) << "Failed to create logical device\n";
+    }
 }   
+
+VulkanContext::~VulkanContext() {
+    LOG_INIT_CERR();
+    VKA(vkDeviceWaitIdle(device));
+    VK(vkDestroyDevice(device, nullptr));
+    VK(vkDestroyInstance(instance, nullptr));
+}
