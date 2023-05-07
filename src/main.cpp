@@ -14,39 +14,68 @@
 
 #include <Windows.h>
 
-int main(int argc, char *argv[]) {
-    // Initializing logger
+#define _DEBUG
+
+bool handleEvents() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_QUIT:
+            return false;
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE)
+                return false;
+            break;
+        }
+    }
+    return true;
+}
+
+int main(int, char**) {
+    // Initiate logger (default name is 'log')
     LOG_INIT_CERR();
-    
-    log(LOG_INFO) << "Loading module\n";
-    PyModule module;
 
-    log(LOG_INFO) << "Running module\n";
-    module.run();
-
-    Sleep(500);
-
-    log(LOG_INFO) << "Connecting to module\n";
-    module.connect();
-
-    Sleep(1000);
-
-    log(LOG_INFO) << "Starting stream\n";
-    module.startStream();
-
-    Sleep(500);
-
-    log(LOG_INFO) << "Reading data\n";
-    for (int i = 0; i < 3; i++) {
-        module.readData();
-        Sleep(1000);
+    // Init SDL and create a window
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        log(LOG_ERROR) << "SDL_Init Error: " << SDL_GetError() << "\n";
+        return 1;
     }
 
-    log(LOG_INFO) << "Stopping stream\n";
-    module.stopStream();
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_Window* window = SDL_CreateWindow("Hello World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    if (window == nullptr) {
+        log(LOG_ERROR) << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
+        SDL_Quit();
+        return 1;
+    }
 
-    log(LOG_INFO) << "Stopping module\n";
-    module.stop();
+    // Get Instance Extensions
+    uint32_t extensionCount = 0;
+    SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr);
+    std::vector<const char*> extensions(extensionCount);
+    SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, extensions.data());
 
+    // Set Instance Layers
+    #ifdef _DEBUG
+        const std::vector<const char*> layers = {
+            "VK_LAYER_KHRONOS_validation"
+        };
+    #else
+        const std::vector<const char*> layers = {};
+    #endif
+
+    // Set Device Extensions
+    const std::vector<const char*> device_extensions = {};
+
+    // Init Vulkan
+    VulkanContext vkContext(layers, extensions, device_extensions);
+
+    //while (handleEvents()) {
+        
+    //}
+    
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
