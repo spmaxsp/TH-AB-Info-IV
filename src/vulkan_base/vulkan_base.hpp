@@ -19,12 +19,6 @@ struct VulkanQueue {
 
 class VulkanContext {
     private:
-        VkInstance instance;
-        VkPhysicalDevice physicalDevice;
-        VkPhysicalDeviceProperties selectedDeviceProperties;
-        VkDevice device;
-        VulkanQueue graphicsQueue;
-
         bool CheckLayerSupport(std::vector<const char*> layers);
         bool CheckExtensionSupport(std::vector<const char*> extensions);
 
@@ -33,6 +27,27 @@ class VulkanContext {
         bool selectPhysicalDevice();
         bool createLogicalDevice(std::vector<const char*> device_extensions);
     public:
+        VkInstance instance;
+        VkPhysicalDevice physicalDevice;
+        VkPhysicalDeviceProperties selectedDeviceProperties;
+        VkDevice device;
+        VulkanQueue graphicsQueue;
+
         VulkanContext(std::vector<const char*> layers, std::vector<const char*> extensions, std::vector<const char*> device_extensions);
         ~VulkanContext();
 };
+
+class VulkanSwapchain {
+    public:
+        VulkanContext* context;
+        VkSurfaceKHR surface;
+
+        VkSwapchainKHR swapchain;
+        VkExtent2D extent;
+        VkFormat format;
+        std::vector<VkImage> images;
+
+        VulkanSwapchain(VulkanContext* context, VkSurfaceKHR surface, VkImageUsageFlags usageFlags);
+        ~VulkanSwapchain();
+};
+

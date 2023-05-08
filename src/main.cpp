@@ -62,14 +62,27 @@ int main(int, char**) {
             "VK_LAYER_KHRONOS_validation"
         };
     #else
-        const std::vector<const char*> layers = {};
+        const std::vector<const char*> layers = {
+
+        };
     #endif
 
     // Set Device Extensions
-    const std::vector<const char*> device_extensions = {};
+    const std::vector<const char*> device_extensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
 
     // Init Vulkan
     VulkanContext vkContext(layers, extensions, device_extensions);
+
+    // Get Surface
+    VkSurfaceKHR surface;
+    if (!SDL_Vulkan_CreateSurface(window, vkContext.instance, &surface)) {
+        log(LOG_ERROR) << "SDL_Vulkan_CreateSurface Error: " << SDL_GetError() << "\n";
+        SDL_Quit();
+        return 1;
+    }
+    VulkanSwapchain swapchain(&vkContext, surface, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 
     //while (handleEvents()) {
         

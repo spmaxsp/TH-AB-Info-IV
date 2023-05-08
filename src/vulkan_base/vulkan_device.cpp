@@ -217,8 +217,11 @@ VulkanContext::VulkanContext(std::vector<const char*> layers, std::vector<const 
     }
 }   
 
+
+
 VulkanContext::~VulkanContext() {
     LOG_INIT_CERR();
+    log(LOG_INFO) << "Exiting Vulkan\n";
     VKA(vkDeviceWaitIdle(device));
     VK(vkDestroyDevice(device, nullptr));
     VK(vkDestroyInstance(instance, nullptr));

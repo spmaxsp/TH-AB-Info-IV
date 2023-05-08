@@ -29,6 +29,7 @@ set(SOURCE_FILES
     #src/py_extention/modules/Shimmersensor/proto/ShimmersensorProt.pb.cc
 
     src/vulkan_base/vulkan_device.cpp       ### vulkan
+    src/vulkan_base/vulkan_swapchain.cpp
 )
 
 ####################  EXECUTABLE  ####################
