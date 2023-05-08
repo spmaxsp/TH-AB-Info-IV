@@ -9,8 +9,8 @@
 
 //#include "py_extention/PyRunner.hpp"
 #include "py_extention/PyShellExec.hpp"
-#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
-//#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
+//#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
+#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
 
 #include <Windows.h>
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     LOG_INIT_CERR();
     
     log(LOG_INFO) << "Loading module\n";
-    PyModule module;
+    Shimmersensor module;
 
     log(LOG_INFO) << "Running module\n";
     module.run();

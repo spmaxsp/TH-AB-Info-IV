@@ -1,7 +1,29 @@
 syntax = "proto3";
 
-package shimmer;
+package ShimmersensorProt;
+
+enum Command {
+  COMMAND_NOOP = 0;
+  COMMAND_START_STREAM = 1;
+  COMMAND_STOP_STREAM = 2;
+}
+
+enum State {
+  STATE_IDLE = 0;
+  STATE_STREAMING = 1;
+  STATE_ERROR = 2;
+}
 
 message DataPacket {
-  int32 accel_ln_x = 1;
+  State state = 1;
+  string timestamp = 2;
+  int32 accel_ln_x = 3;
+  int32 accel_ln_y = 4;
+  int32 accel_ln_z = 5;
 }
+
+message SendCommand {
+  Command command = 1;
+  optional int32 value = 2;
+}
+
