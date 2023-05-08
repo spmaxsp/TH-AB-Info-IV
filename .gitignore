@@ -14,3 +14,7 @@
 # Entire build directory
 build/
 bin/
+
+
+#macos
+.DS_Store
