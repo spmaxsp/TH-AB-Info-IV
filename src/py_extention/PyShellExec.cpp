@@ -52,7 +52,7 @@ bool PyShellExec::run(){
     siStartInfo.cb = sizeof(STARTUPINFO);
     siStartInfo.dwFlags |= STARTF_USESHOWWINDOW;
     siStartInfo.wShowWindow = SW_HIDE;
-    siStartInfo.hStdError = nullptr;
+    siStartInfo.hStdError = outPipeWrite;
     siStartInfo.hStdOutput = outPipeWrite;
     siStartInfo.dwFlags |= STARTF_USESTDHANDLES;
 
