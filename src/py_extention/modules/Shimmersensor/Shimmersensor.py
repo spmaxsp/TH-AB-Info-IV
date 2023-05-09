@@ -31,13 +31,14 @@ class Shimmersensor:
         accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
 
     def StarteSensor(self):
+        print("Starting sensor...")
         serial = Serial('COM5', DEFAULT_BAUDRATE)
         shim_dev = ShimmerBluetooth(serial)
 
         shim_dev.initialize()
 
         dev_name = shim_dev.get_device_name()
-        print(f'My name is: {dev_name}')
+        print(f'Sensor name is: {dev_name}')
 
         shim_dev.add_stream_callback(handler)
 
@@ -45,12 +46,11 @@ class Shimmersensor:
 
 
     def StoppeSensor(self):
+        print("Stopping sensor...")
         shim_dev.stop_streaming()
         shim_dev.shutdown()
 
-global streaming
 streaming = False
-global sensor 
 sensor = Shimmersensor()
 
 async def handle_client(reader, writer):
@@ -94,7 +94,7 @@ async def handle_client(reader, writer):
                 streaming = False
                 break
 
-            print(f"Received data from {addr}: {data.decode()}")
+            print(f"Received data from {addr}: {data}")
 
             pb = proto.SendCommand()
             pb.ParseFromString(data)
