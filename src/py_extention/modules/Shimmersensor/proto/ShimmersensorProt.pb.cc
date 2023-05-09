@@ -20,10 +20,14 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace _pb = ::PROTOBUF_NAMESPACE_ID;
 namespace _pbi = _pb::internal;
 
-namespace shimmer {
+namespace ShimmersensorProt {
 PROTOBUF_CONSTEXPR DataPacket::DataPacket(
     ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.accel_ln_x_)*/0
+    /*decltype(_impl_.timestamp_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.state_)*/0
+  , /*decltype(_impl_.accel_ln_x_)*/0
+  , /*decltype(_impl_.accel_ln_y_)*/0
+  , /*decltype(_impl_.accel_ln_z_)*/0
   , /*decltype(_impl_._cached_size_)*/{}} {}
 struct DataPacketDefaultTypeInternal {
   PROTOBUF_CONSTEXPR DataPacketDefaultTypeInternal()
@@ -34,37 +38,77 @@ struct DataPacketDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DataPacketDefaultTypeInternal _DataPacket_default_instance_;
-}  // namespace shimmer
-static ::_pb::Metadata file_level_metadata_ShimmersensorProt_2eproto[1];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_ShimmersensorProt_2eproto = nullptr;
+PROTOBUF_CONSTEXPR SendCommand::SendCommand(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_._has_bits_)*/{}
+  , /*decltype(_impl_._cached_size_)*/{}
+  , /*decltype(_impl_.command_)*/0
+  , /*decltype(_impl_.value_)*/0} {}
+struct SendCommandDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR SendCommandDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~SendCommandDefaultTypeInternal() {}
+  union {
+    SendCommand _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SendCommandDefaultTypeInternal _SendCommand_default_instance_;
+}  // namespace ShimmersensorProt
+static ::_pb::Metadata file_level_metadata_ShimmersensorProt_2eproto[2];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_ShimmersensorProt_2eproto[2];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_ShimmersensorProt_2eproto = nullptr;
 
 const uint32_t TableStruct_ShimmersensorProt_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::shimmer::DataPacket, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::DataPacket, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::shimmer::DataPacket, _impl_.accel_ln_x_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::DataPacket, _impl_.state_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::DataPacket, _impl_.timestamp_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::DataPacket, _impl_.accel_ln_x_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::DataPacket, _impl_.accel_ln_y_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::DataPacket, _impl_.accel_ln_z_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::SendCommand, _impl_._has_bits_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::SendCommand, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::SendCommand, _impl_.command_),
+  PROTOBUF_FIELD_OFFSET(::ShimmersensorProt::SendCommand, _impl_.value_),
+  ~0u,
+  0,
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::shimmer::DataPacket)},
+  { 0, -1, -1, sizeof(::ShimmersensorProt::DataPacket)},
+  { 11, 19, -1, sizeof(::ShimmersensorProt::SendCommand)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::shimmer::_DataPacket_default_instance_._instance,
+  &::ShimmersensorProt::_DataPacket_default_instance_._instance,
+  &::ShimmersensorProt::_SendCommand_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_ShimmersensorProt_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\027ShimmersensorProt.proto\022\007shimmer\" \n\nDa"
-  "taPacket\022\022\n\naccel_ln_x\030\001 \001(\005b\006proto3"
+  "\n\027ShimmersensorProt.proto\022\021Shimmersensor"
+  "Prot\"\204\001\n\nDataPacket\022\'\n\005state\030\001 \001(\0162\030.Shi"
+  "mmersensorProt.State\022\021\n\ttimestamp\030\002 \001(\t\022"
+  "\022\n\naccel_ln_x\030\003 \001(\005\022\022\n\naccel_ln_y\030\004 \001(\005\022"
+  "\022\n\naccel_ln_z\030\005 \001(\005\"X\n\013SendCommand\022+\n\007co"
+  "mmand\030\001 \001(\0162\032.ShimmersensorProt.Command\022"
+  "\022\n\005value\030\002 \001(\005H\000\210\001\001B\010\n\006_value*N\n\007Command"
+  "\022\020\n\014COMMAND_NOOP\020\000\022\030\n\024COMMAND_START_STRE"
+  "AM\020\001\022\027\n\023COMMAND_STOP_STREAM\020\002*=\n\005State\022\016"
+  "\n\nSTATE_IDLE\020\000\022\023\n\017STATE_STREAMING\020\001\022\017\n\013S"
+  "TATE_ERROR\020\002b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_ShimmersensorProt_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_ShimmersensorProt_2eproto = {
-    false, false, 76, descriptor_table_protodef_ShimmersensorProt_2eproto,
+    false, false, 420, descriptor_table_protodef_ShimmersensorProt_2eproto,
     "ShimmersensorProt.proto",
-    &descriptor_table_ShimmersensorProt_2eproto_once, nullptr, 0, 1,
+    &descriptor_table_ShimmersensorProt_2eproto_once, nullptr, 0, 2,
     schemas, file_default_instances, TableStruct_ShimmersensorProt_2eproto::offsets,
     file_level_metadata_ShimmersensorProt_2eproto, file_level_enum_descriptors_ShimmersensorProt_2eproto,
     file_level_service_descriptors_ShimmersensorProt_2eproto,
@@ -75,7 +119,37 @@ PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_Shimmers
 
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_ShimmersensorProt_2eproto(&descriptor_table_ShimmersensorProt_2eproto);
-namespace shimmer {
+namespace ShimmersensorProt {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Command_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_ShimmersensorProt_2eproto);
+  return file_level_enum_descriptors_ShimmersensorProt_2eproto[0];
+}
+bool Command_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* State_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_ShimmersensorProt_2eproto);
+  return file_level_enum_descriptors_ShimmersensorProt_2eproto[1];
+}
+bool State_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+      return true;
+    default:
+      return false;
+  }
+}
+
 
 // ===================================================================
 
@@ -87,18 +161,32 @@ DataPacket::DataPacket(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
   SharedCtor(arena, is_message_owned);
-  // @@protoc_insertion_point(arena_constructor:shimmer.DataPacket)
+  // @@protoc_insertion_point(arena_constructor:ShimmersensorProt.DataPacket)
 }
 DataPacket::DataPacket(const DataPacket& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   DataPacket* const _this = this; (void)_this;
   new (&_impl_) Impl_{
-      decltype(_impl_.accel_ln_x_){}
+      decltype(_impl_.timestamp_){}
+    , decltype(_impl_.state_){}
+    , decltype(_impl_.accel_ln_x_){}
+    , decltype(_impl_.accel_ln_y_){}
+    , decltype(_impl_.accel_ln_z_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _this->_impl_.accel_ln_x_ = from._impl_.accel_ln_x_;
-  // @@protoc_insertion_point(copy_constructor:shimmer.DataPacket)
+  _impl_.timestamp_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.timestamp_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  if (!from._internal_timestamp().empty()) {
+    _this->_impl_.timestamp_.Set(from._internal_timestamp(), 
+      _this->GetArenaForAllocation());
+  }
+  ::memcpy(&_impl_.state_, &from._impl_.state_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.accel_ln_z_) -
+    reinterpret_cast<char*>(&_impl_.state_)) + sizeof(_impl_.accel_ln_z_));
+  // @@protoc_insertion_point(copy_constructor:ShimmersensorProt.DataPacket)
 }
 
 inline void DataPacket::SharedCtor(
@@ -106,13 +194,21 @@ inline void DataPacket::SharedCtor(
   (void)arena;
   (void)is_message_owned;
   new (&_impl_) Impl_{
-      decltype(_impl_.accel_ln_x_){0}
+      decltype(_impl_.timestamp_){}
+    , decltype(_impl_.state_){0}
+    , decltype(_impl_.accel_ln_x_){0}
+    , decltype(_impl_.accel_ln_y_){0}
+    , decltype(_impl_.accel_ln_z_){0}
     , /*decltype(_impl_._cached_size_)*/{}
   };
+  _impl_.timestamp_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.timestamp_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 DataPacket::~DataPacket() {
-  // @@protoc_insertion_point(destructor:shimmer.DataPacket)
+  // @@protoc_insertion_point(destructor:ShimmersensorProt.DataPacket)
   if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
   (void)arena;
     return;
@@ -122,6 +218,7 @@ DataPacket::~DataPacket() {
 
 inline void DataPacket::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.timestamp_.Destroy();
 }
 
 void DataPacket::SetCachedSize(int size) const {
@@ -129,12 +226,15 @@ void DataPacket::SetCachedSize(int size) const {
 }
 
 void DataPacket::Clear() {
-// @@protoc_insertion_point(message_clear_start:shimmer.DataPacket)
+// @@protoc_insertion_point(message_clear_start:ShimmersensorProt.DataPacket)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.accel_ln_x_ = 0;
+  _impl_.timestamp_.ClearToEmpty();
+  ::memset(&_impl_.state_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.accel_ln_z_) -
+      reinterpret_cast<char*>(&_impl_.state_)) + sizeof(_impl_.accel_ln_z_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -144,10 +244,45 @@ const char* DataPacket::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // int32 accel_ln_x = 1;
+      // .ShimmersensorProt.State state = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_state(static_cast<::ShimmersensorProt::State>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // string timestamp = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
+          auto str = _internal_mutable_timestamp();
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(ptr);
+          CHK_(::_pbi::VerifyUTF8(str, "ShimmersensorProt.DataPacket.timestamp"));
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 accel_ln_x = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
           _impl_.accel_ln_x_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 accel_ln_y = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          _impl_.accel_ln_y_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 accel_ln_z = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _impl_.accel_ln_z_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -177,35 +312,87 @@ failure:
 
 uint8_t* DataPacket::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:shimmer.DataPacket)
+  // @@protoc_insertion_point(serialize_to_array_start:ShimmersensorProt.DataPacket)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // int32 accel_ln_x = 1;
+  // .ShimmersensorProt.State state = 1;
+  if (this->_internal_state() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_state(), target);
+  }
+
+  // string timestamp = 2;
+  if (!this->_internal_timestamp().empty()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_timestamp().data(), static_cast<int>(this->_internal_timestamp().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "ShimmersensorProt.DataPacket.timestamp");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_timestamp(), target);
+  }
+
+  // int32 accel_ln_x = 3;
   if (this->_internal_accel_ln_x() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(1, this->_internal_accel_ln_x(), target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(3, this->_internal_accel_ln_x(), target);
+  }
+
+  // int32 accel_ln_y = 4;
+  if (this->_internal_accel_ln_y() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(4, this->_internal_accel_ln_y(), target);
+  }
+
+  // int32 accel_ln_z = 5;
+  if (this->_internal_accel_ln_z() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(5, this->_internal_accel_ln_z(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:shimmer.DataPacket)
+  // @@protoc_insertion_point(serialize_to_array_end:ShimmersensorProt.DataPacket)
   return target;
 }
 
 size_t DataPacket::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:shimmer.DataPacket)
+// @@protoc_insertion_point(message_byte_size_start:ShimmersensorProt.DataPacket)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // int32 accel_ln_x = 1;
+  // string timestamp = 2;
+  if (!this->_internal_timestamp().empty()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_timestamp());
+  }
+
+  // .ShimmersensorProt.State state = 1;
+  if (this->_internal_state() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_state());
+  }
+
+  // int32 accel_ln_x = 3;
   if (this->_internal_accel_ln_x() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_accel_ln_x());
+  }
+
+  // int32 accel_ln_y = 4;
+  if (this->_internal_accel_ln_y() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_accel_ln_y());
+  }
+
+  // int32 accel_ln_z = 5;
+  if (this->_internal_accel_ln_z() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_accel_ln_z());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -221,19 +408,31 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DataPacket::GetClassData() con
 void DataPacket::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
   auto* const _this = static_cast<DataPacket*>(&to_msg);
   auto& from = static_cast<const DataPacket&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:shimmer.DataPacket)
+  // @@protoc_insertion_point(class_specific_merge_from_start:ShimmersensorProt.DataPacket)
   GOOGLE_DCHECK_NE(&from, _this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (!from._internal_timestamp().empty()) {
+    _this->_internal_set_timestamp(from._internal_timestamp());
+  }
+  if (from._internal_state() != 0) {
+    _this->_internal_set_state(from._internal_state());
+  }
   if (from._internal_accel_ln_x() != 0) {
     _this->_internal_set_accel_ln_x(from._internal_accel_ln_x());
+  }
+  if (from._internal_accel_ln_y() != 0) {
+    _this->_internal_set_accel_ln_y(from._internal_accel_ln_y());
+  }
+  if (from._internal_accel_ln_z() != 0) {
+    _this->_internal_set_accel_ln_z(from._internal_accel_ln_z());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void DataPacket::CopyFrom(const DataPacket& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:shimmer.DataPacket)
+// @@protoc_insertion_point(class_specific_copy_from_start:ShimmersensorProt.DataPacket)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -245,8 +444,19 @@ bool DataPacket::IsInitialized() const {
 
 void DataPacket::InternalSwap(DataPacket* other) {
   using std::swap;
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.accel_ln_x_, other->_impl_.accel_ln_x_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.timestamp_, lhs_arena,
+      &other->_impl_.timestamp_, rhs_arena
+  );
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(DataPacket, _impl_.accel_ln_z_)
+      + sizeof(DataPacket::_impl_.accel_ln_z_)
+      - PROTOBUF_FIELD_OFFSET(DataPacket, _impl_.state_)>(
+          reinterpret_cast<char*>(&_impl_.state_),
+          reinterpret_cast<char*>(&other->_impl_.state_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DataPacket::GetMetadata() const {
@@ -255,12 +465,241 @@ void DataPacket::InternalSwap(DataPacket* other) {
       file_level_metadata_ShimmersensorProt_2eproto[0]);
 }
 
+// ===================================================================
+
+class SendCommand::_Internal {
+ public:
+  using HasBits = decltype(std::declval<SendCommand>()._impl_._has_bits_);
+  static void set_has_value(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+};
+
+SendCommand::SendCommand(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:ShimmersensorProt.SendCommand)
+}
+SendCommand::SendCommand(const SendCommand& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  SendCommand* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){from._impl_._has_bits_}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.command_){}
+    , decltype(_impl_.value_){}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&_impl_.command_, &from._impl_.command_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.value_) -
+    reinterpret_cast<char*>(&_impl_.command_)) + sizeof(_impl_.value_));
+  // @@protoc_insertion_point(copy_constructor:ShimmersensorProt.SendCommand)
+}
+
+inline void SendCommand::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_._has_bits_){}
+    , /*decltype(_impl_._cached_size_)*/{}
+    , decltype(_impl_.command_){0}
+    , decltype(_impl_.value_){0}
+  };
+}
+
+SendCommand::~SendCommand() {
+  // @@protoc_insertion_point(destructor:ShimmersensorProt.SendCommand)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void SendCommand::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void SendCommand::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void SendCommand::Clear() {
+// @@protoc_insertion_point(message_clear_start:ShimmersensorProt.SendCommand)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.command_ = 0;
+  _impl_.value_ = 0;
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* SendCommand::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .ShimmersensorProt.Command command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_command(static_cast<::ShimmersensorProt::Command>(val));
+        } else
+          goto handle_unusual;
+        continue;
+      // optional int32 value = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _Internal::set_has_value(&has_bits);
+          _impl_.value_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  _impl_._has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* SendCommand::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:ShimmersensorProt.SendCommand)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .ShimmersensorProt.Command command = 1;
+  if (this->_internal_command() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_command(), target);
+  }
+
+  // optional int32 value = 2;
+  if (_internal_has_value()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(2, this->_internal_value(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:ShimmersensorProt.SendCommand)
+  return target;
+}
+
+size_t SendCommand::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:ShimmersensorProt.SendCommand)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .ShimmersensorProt.Command command = 1;
+  if (this->_internal_command() != 0) {
+    total_size += 1 +
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_command());
+  }
+
+  // optional int32 value = 2;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_value());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData SendCommand::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    SendCommand::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*SendCommand::GetClassData() const { return &_class_data_; }
+
+
+void SendCommand::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<SendCommand*>(&to_msg);
+  auto& from = static_cast<const SendCommand&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:ShimmersensorProt.SendCommand)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_command() != 0) {
+    _this->_internal_set_command(from._internal_command());
+  }
+  if (from._internal_has_value()) {
+    _this->_internal_set_value(from._internal_value());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void SendCommand::CopyFrom(const SendCommand& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:ShimmersensorProt.SendCommand)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SendCommand::IsInitialized() const {
+  return true;
+}
+
+void SendCommand::InternalSwap(SendCommand* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(SendCommand, _impl_.value_)
+      + sizeof(SendCommand::_impl_.value_)
+      - PROTOBUF_FIELD_OFFSET(SendCommand, _impl_.command_)>(
+          reinterpret_cast<char*>(&_impl_.command_),
+          reinterpret_cast<char*>(&other->_impl_.command_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata SendCommand::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_ShimmersensorProt_2eproto_getter, &descriptor_table_ShimmersensorProt_2eproto_once,
+      file_level_metadata_ShimmersensorProt_2eproto[1]);
+}
+
 // @@protoc_insertion_point(namespace_scope)
-}  // namespace shimmer
+}  // namespace ShimmersensorProt
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::shimmer::DataPacket*
-Arena::CreateMaybeMessage< ::shimmer::DataPacket >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::shimmer::DataPacket >(arena);
+template<> PROTOBUF_NOINLINE ::ShimmersensorProt::DataPacket*
+Arena::CreateMaybeMessage< ::ShimmersensorProt::DataPacket >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::ShimmersensorProt::DataPacket >(arena);
+}
+template<> PROTOBUF_NOINLINE ::ShimmersensorProt::SendCommand*
+Arena::CreateMaybeMessage< ::ShimmersensorProt::SendCommand >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::ShimmersensorProt::SendCommand >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 
