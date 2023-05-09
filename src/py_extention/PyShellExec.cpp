@@ -135,8 +135,8 @@ void PyShellExec::readOutput(){
         if (bytesRead == 0) {
             break;
         }
-        if (buffer[0] != '\r' && buffer[0] != '\n') {
-            std::cout << "\033[0;31m[PyShellExec]\033[0m" << "[Thread " << std::this_thread::get_id() << "] " << buffer << std::endl;
+        if (!((buffer[0] == '\r' || buffer[0] == '\n') && buffer[2] == 0)) {
+            std::cout << "\033[0;32m[PyShellExec]" << "[Thread " << std::this_thread::get_id() << "]\033[0m " << buffer << std::endl;
         }
         memset(buffer, 0, BUFSIZ);
     }

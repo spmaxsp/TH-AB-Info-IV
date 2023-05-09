@@ -99,6 +99,7 @@ async def handle_client(reader, writer):
             pb = proto.SendCommand()
             pb.ParseFromString(data)
 
+            print(f"Command is: {pb.command}")
             if pb.command == proto.Command.COMMAND_START_STREAM:
                 print("Starting stream...")
                 sensor.StarteSensor()

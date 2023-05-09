@@ -28,7 +28,7 @@ void Shimmersensor::startStream() {
     pb.SerializeToString(&data);
 
     std::string dbg = pb.DebugString();
-    log(LOG_INFO) << "Sending data (raw): " << dbg << "\n";
+    log(LOG_INFO) << "Sending data (raw): " << dbg;
 
     client.sockSend(data);
 }
