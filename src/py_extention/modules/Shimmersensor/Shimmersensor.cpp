@@ -1,6 +1,6 @@
 #include "Shimmersensor.hpp"
 
-Shimmersensor::Shimmersensor() : shell_exec("python -u", "scripts/Shimmersensor.py", {}), client("127.0.0.1", 50007) {
+Shimmersensor::Shimmersensor() : shell_exec("python -u", "scripts/Shimmersensor.py", {}), client("127.0.0.1", 50008) {
 }
 
 Shimmersensor::~Shimmersensor() {
@@ -20,12 +20,16 @@ void Shimmersensor::connect() {
 }
 
 void Shimmersensor::startStream() {
+    LOG_INIT_CERR();
+
     ShimmersensorProt::SendCommand pb;
     pb.set_command(ShimmersensorProt::Command::COMMAND_START_STREAM);
     std::string data;
     pb.SerializeToString(&data);
-    //std::string dbg = pb.DebugString();
-    //std::cout << "Debug: " << dbg << "\n";
+
+    std::string dbg = pb.DebugString();
+    log(LOG_INFO) << "Sending data (raw): " << dbg << "\n";
+
     client.sockSend(data);
 }
 
