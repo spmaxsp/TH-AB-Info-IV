@@ -6,7 +6,7 @@ from datetime import datetime
 from serial import Serial
 from pyshimmer import ShimmerBluetooth, DEFAULT_BAUDRATE, DataPacket, EChannelType
 
-import PyModuleProt_pb2 as proto
+import ShimmersensorProt_pb2 as proto
 
 import os
 import sys
@@ -19,16 +19,19 @@ PORT = 50008              # Arbitrary port
 
 global streaming
 streaming = False
+
+def Handler(pkt: DataPacket) -> None:
+    global sensor
+    #print("sensor data...")
+    sensor.accel_ln_x = pkt[EChannelType.ACCEL_LN_X]
+    sensor.accel_ln_y = pkt[EChannelType.ACCEL_LN_Y]
+    sensor.accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
+
 class Shimmersensor: 
     shim_dev = None
     accel_ln_x = 0
     accel_ln_y = 0
     accel_ln_z = 0
-
-    def Handler(self, pkt: DataPacket) -> None:
-        accel_ln_x = pkt[EChannelType.ACCEL_LN_X]
-        accel_ln_y = pkt[EChannelType.ACCEL_LN_Y]
-        accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
 
     def StarteSensor(self):
         print("Starting sensor...")
@@ -40,7 +43,7 @@ class Shimmersensor:
         dev_name = shim_dev.get_device_name()
         print(f'Sensor name is: {dev_name}')
 
-        shim_dev.add_stream_callback(handler)
+        shim_dev.add_stream_callback(Handler)
 
         shim_dev.start_streaming()
 
@@ -54,6 +57,7 @@ streaming = False
 sensor = Shimmersensor()
 
 async def handle_client(reader, writer):
+    global sensor
     addr = writer.get_extra_info('peername')
     print(f"New client connected: {addr}")
     
@@ -67,10 +71,10 @@ async def handle_client(reader, writer):
                 pb.state = proto.State.STATE_STREAMING
                 now = datetime.now()
                 pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                pb.accel_ln_x = sensor.accel_ln_x 
+                pb.accel_ln_x = sensor.accel_ln_x
                 pb.accel_ln_y = sensor.accel_ln_y 
                 pb.accel_ln_z = sensor.accel_ln_z 
-                #print (pb.some_sensor)
+                #print (sensor.accel_ln_x)
                 try:
                     writer.write(pb.SerializeToString())
                     await writer.drain()
@@ -103,7 +107,9 @@ async def handle_client(reader, writer):
             if pb.command == proto.Command.COMMAND_START_STREAM:
                 print("Starting stream...")
                 sensor.StarteSensor()
+                print("running")
                 streaming = True
+                print("Sensor running")
             elif pb.command == proto.Command.COMMAND_STOP_STREAM:
                 print("Stopping stream...")
                 sensor.StoppeSensor()
