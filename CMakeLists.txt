@@ -30,6 +30,8 @@ set(SOURCE_FILES
 
     src/vulkan_base/vulkan_device.cpp       ### vulkan
     src/vulkan_base/vulkan_swapchain.cpp
+    src/vulkan_base/vulkan_renderpass.cpp
+    src/vulkan_base/vulkan_cmdbuffer.cpp
 )
 
 ####################  EXECUTABLE  ####################

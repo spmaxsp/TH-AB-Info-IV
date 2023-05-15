@@ -33,8 +33,16 @@ class VulkanContext {
         VkDevice device;
         VulkanQueue graphicsQueue;
 
-        VulkanContext(std::vector<const char*> layers, std::vector<const char*> extensions, std::vector<const char*> device_extensions);
-        ~VulkanContext();
+        void createVulkanContext(std::vector<const char*> layers, std::vector<const char*> extensions, std::vector<const char*> device_extensions);
+        void destroyVulkanContext();
+
+        VulkanContext(){ 
+            instance = VK_NULL_HANDLE; 
+            physicalDevice = VK_NULL_HANDLE; 
+            selectedDeviceProperties = {};
+            device = VK_NULL_HANDLE; 
+            graphicsQueue = {};
+        }
 };
 
 class VulkanSwapchain {
@@ -46,8 +54,66 @@ class VulkanSwapchain {
         VkExtent2D extent;
         VkFormat format;
         std::vector<VkImage> images;
+        std::vector<VkImageView> imageViews;
 
-        VulkanSwapchain(VulkanContext* context, VkSurfaceKHR surface, VkImageUsageFlags usageFlags);
-        ~VulkanSwapchain();
+        void createSwapchain(VulkanContext* context, VkSurfaceKHR surface, VkImageUsageFlags usageFlags);
+        void destroySwapchain();
+
+        VulkanSwapchain(){ 
+            context = nullptr; 
+            surface = VK_NULL_HANDLE; 
+            swapchain = VK_NULL_HANDLE; 
+            extent = {0,0}; 
+            format = VK_FORMAT_UNDEFINED; 
+            images = {};
+            imageViews = {};
+        }
 };
+
+class VulkanRenderPass {
+    public:
+        VulkanContext* context;
+        VulkanSwapchain* swapchain;
+
+        VkRenderPass renderPass;
+        std::vector<VkFramebuffer> framebuffers;
+
+        void createRenderPass(VulkanContext* context, VulkanSwapchain* swapchain);
+        void destroyRenderPass();
+
+        VulkanRenderPass(){ 
+            context = nullptr; 
+            swapchain = nullptr; 
+            renderPass = VK_NULL_HANDLE; 
+            framebuffers = {};
+        }
+};
+
+
+class VulkanCommandBuffer {
+    public:
+        VulkanContext* context;
+        VulkanSwapchain* swapchain;
+        VulkanRenderPass* renderPass;
+
+        VkCommandPool commandPool;
+        VkCommandBuffer commandBuffer;
+
+        void createCommandBuffer(VulkanContext* context, VulkanSwapchain* swapchain, VulkanRenderPass* renderPass);
+        void destroyCommandBuffer();
+
+        void beginCommandBuffer();
+        void endCommandBuffer();
+
+        void resetCommandPool();	
+
+        VulkanCommandBuffer(){ 
+            context = nullptr; 
+            swapchain = nullptr; 
+            renderPass = nullptr; 
+            commandPool = VK_NULL_HANDLE; 
+            commandBuffer = VK_NULL_HANDLE;
+        }
+};
+
 

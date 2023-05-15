@@ -1,6 +1,9 @@
 #include "vulkan_base.hpp"
 
-VulkanSwapchain::VulkanSwapchain(VulkanContext* context, VkSurfaceKHR surface, VkImageUsageFlags usageFlags) : context(context), surface(surface) {
+void VulkanSwapchain::createSwapchain(VulkanContext* context, VkSurfaceKHR surface, VkImageUsageFlags usageFlags) {
+    this->context = context;
+    this->surface = surface;
+
     LOG_INIT_CERR();
     log(LOG_INFO) << "Creating Swapchain\n";
 
@@ -66,10 +69,27 @@ VulkanSwapchain::VulkanSwapchain(VulkanContext* context, VkSurfaceKHR surface, V
 
     images.resize(numSwapchainImages);
     VKA(vkGetSwapchainImagesKHR(context->device, swapchain, &numSwapchainImages, images.data()));
+
+    // Create image views 
+    imageViews.resize(numSwapchainImages);
+    for (uint32_t i = 0; i < numSwapchainImages; i++) {
+        VkImageViewCreateInfo imageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+        imageViewCreateInfo.image = images[i];
+        imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        imageViewCreateInfo.format = format;
+        imageViewCreateInfo.components = { };
+        imageViewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+        VKA(vkCreateImageView(context->device, &imageViewCreateInfo, nullptr, &imageViews[i]));
+    }
 }
 
-VulkanSwapchain::~VulkanSwapchain() {
+void VulkanSwapchain::destroySwapchain() {
     LOG_INIT_CERR();
+
+    log(LOG_INFO) << "Destroying Image Views\n";
+    for (auto& imageView : imageViews) {
+        VK(vkDestroyImageView(context->device, imageView, nullptr));
+    }
     log(LOG_INFO) << "Destroying Swapchain\n";
     VK(vkDestroySwapchainKHR(context->device, swapchain, nullptr));
     log(LOG_INFO) << "Destroying Surface\n";

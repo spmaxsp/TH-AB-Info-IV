@@ -195,7 +195,7 @@ bool VulkanContext::createLogicalDevice(std::vector<const char*> device_extensio
     return true;
 }
 
-VulkanContext::VulkanContext(std::vector<const char*> layers, std::vector<const char*> extensions, std::vector<const char*> device_extensions) {
+void VulkanContext::createVulkanContext(std::vector<const char*> layers, std::vector<const char*> extensions, std::vector<const char*> device_extensions) {
     LOG_INIT_CERR();
 
     // Create Vulkan instance
@@ -217,10 +217,9 @@ VulkanContext::VulkanContext(std::vector<const char*> layers, std::vector<const 
     }
 }   
 
-
-
-VulkanContext::~VulkanContext() {
+void VulkanContext::destroyVulkanContext() {
     LOG_INIT_CERR();
+
     log(LOG_INFO) << "Exiting Vulkan\n";
     VKA(vkDeviceWaitIdle(device));
     VK(vkDestroyDevice(device, nullptr));
