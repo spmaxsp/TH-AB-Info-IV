@@ -109,7 +109,6 @@ void VulkanApp::ExitVulkan() {
 
     renderPass.destroyRenderPass();
     swapchain.destroySwapchain();
-    VK(vkDestroySurfaceKHR(context.instance, surface, nullptr));
     context.destroyVulkanContext();
 }
 
