@@ -2,6 +2,25 @@ syntax = "proto3";
 
 package PyModuleProt;
 
+enum Command {
+  COMMAND_NOOP = 0;
+  COMMAND_START_STREAM = 1;
+  COMMAND_STOP_STREAM = 2;
+}
+
+enum State {
+  STATE_IDLE = 0;
+  STATE_STREAMING = 1;
+  STATE_ERROR = 2;
+}
+
 message DataPacket {
-  int32 some_sensor = 1;
+  State state = 1;
+  string timestamp = 2;
+  int32 some_sensor = 3;
+}
+
+message SendCommand {
+  Command command = 1;
+  optional int32 value = 2;
 }

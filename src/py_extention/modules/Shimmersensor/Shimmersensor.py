@@ -1,48 +1,128 @@
 import time
-import Shimmersensor_pb2
+import asyncio
+
+from datetime import datetime
 
 from serial import Serial
-
 from pyshimmer import ShimmerBluetooth, DEFAULT_BAUDRATE, DataPacket, EChannelType
 
+import ShimmersensorProt_pb2 as proto
 
-def handler(pkt: DataPacket) -> None:
-    cur_value = pkt[EChannelType.ACCEL_LN_X]
-    print(cur_value)
+import os
+import sys
 
-def starteSensor():
-    serial = Serial('COM5', DEFAULT_BAUDRATE)
-    shim_dev = ShimmerBluetooth(serial)
+# Add the path to the module to the system path
+sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
-    shim_dev.initialize()
+HOST = '127.0.0.1'        # Local host
+PORT = 50008              # Arbitrary port
 
-    dev_name = shim_dev.get_device_name()
-    print(f'My name is: {dev_name}')
+global streaming
+streaming = False
 
-    shim_dev.add_stream_callback(handler)
+def Handler(pkt: DataPacket) -> None:
+    global sensor
+    #print("sensor data...")
+    sensor.accel_ln_x = pkt[EChannelType.ACCEL_LN_X]
+    sensor.accel_ln_y = pkt[EChannelType.ACCEL_LN_Y]
+    sensor.accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
 
-    shim_dev.start_streaming()
+class Shimmersensor: 
+    shim_dev = None
+    accel_ln_x = 0
+    accel_ln_y = 0
+    accel_ln_z = 0
+
+    def StarteSensor(self):
+        print("Starting sensor...")
+        serial = Serial('COM5', DEFAULT_BAUDRATE)
+        shim_dev = ShimmerBluetooth(serial)
+
+        shim_dev.initialize()
+
+        dev_name = shim_dev.get_device_name()
+        print(f'Sensor name is: {dev_name}')
+
+        shim_dev.add_stream_callback(Handler)
+
+        shim_dev.start_streaming()
+
+
+    def StoppeSensor(self):
+        print("Stopping sensor...")
+        shim_dev.stop_streaming()
+        shim_dev.shutdown()
+
+streaming = False
+sensor = Shimmersensor()
+
+async def handle_client(reader, writer):
+    global sensor
+    addr = writer.get_extra_info('peername')
+    print(f"New client connected: {addr}")
     
-    
-if __name__ == '__main__':
-    
-    starteSensor()
-   
-    shim_dev.stop_streaming()
+    async def send_data():
+        global streaming
+        global sensor 
+        while True:
+            if streaming:
+                #print("Sending data...")
+                pb = proto.DataPacket()
+                pb.state = proto.State.STATE_STREAMING
+                now = datetime.now()
+                pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                pb.accel_ln_x = sensor.accel_ln_x
+                pb.accel_ln_y = sensor.accel_ln_y 
+                pb.accel_ln_z = sensor.accel_ln_z 
+                #print (sensor.accel_ln_x)
+                try:
+                    writer.write(pb.SerializeToString())
+                    await writer.drain()
+                except ConnectionResetError:
+                    print(f"Client {addr} disconnected")
+                    break
+            await asyncio.sleep(0.2)
 
-    shim_dev.shutdown()
-    input()
+    async def receive_data():
+        global streaming
+        global sensor 
+        while True:
+            try:
+                data = await reader.read(1024)
+                if not data:
+                    print(f"Client {addr} disconnected")
+                    streaming = False
+                    break
+            except ConnectionResetError:
+                print(f"Client {addr} disconnected")
+                streaming = False
+                break
 
-class ShimmerData:
-    def init(self, accel_x=0.0):
-        self.data = Shimmersensor_pb2.ShimmerData()
-        self.data.accel.x = accel_x
+            print(f"Received data from {addr}: {data}")
 
-    def serialize(self):
-        return self.data.SerializeToString()
+            pb = proto.SendCommand()
+            pb.ParseFromString(data)
 
-    def deserialize(self, data):
-        self.data.ParseFromString(data)
+            print(f"Command is: {pb.command}")
+            if pb.command == proto.Command.COMMAND_START_STREAM:
+                print("Starting stream...")
+                sensor.StarteSensor()
+                print("running")
+                streaming = True
+                print("Sensor running")
+            elif pb.command == proto.Command.COMMAND_STOP_STREAM:
+                print("Stopping stream...")
+                sensor.StoppeSensor()
+                streaming = False
 
-    def set_values(self, accel_x):
-        self.data.accel.x = accel_x
+    receive_task = asyncio.create_task(receive_data())
+    send_task = asyncio.create_task(send_data())
+    await asyncio.gather(receive_task, send_task)
+
+async def main():
+    server = await asyncio.start_server(handle_client, HOST, PORT)
+    async with server:
+        print("Server running on port " + str(PORT))
+        await server.serve_forever()
+
+asyncio.run(main())

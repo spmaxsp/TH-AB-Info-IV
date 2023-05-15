@@ -13,13 +13,19 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12PyModuleProt.proto\x12\x0cPyModuleProt\"!\n\nDataPacket\x12\x13\n\x0bsome_sensor\x18\x01 \x01(\x05\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12PyModuleProt.proto\x12\x0cPyModuleProt\"X\n\nDataPacket\x12\"\n\x05state\x18\x01 \x01(\x0e\x32\x13.PyModuleProt.State\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x13\n\x0bsome_sensor\x18\x03 \x01(\x05\"S\n\x0bSendCommand\x12&\n\x07\x63ommand\x18\x01 \x01(\x0e\x32\x15.PyModuleProt.Command\x12\x12\n\x05value\x18\x02 \x01(\x05H\x00\x88\x01\x01\x42\x08\n\x06_value*N\n\x07\x43ommand\x12\x10\n\x0c\x43OMMAND_NOOP\x10\x00\x12\x18\n\x14\x43OMMAND_START_STREAM\x10\x01\x12\x17\n\x13\x43OMMAND_STOP_STREAM\x10\x02*=\n\x05State\x12\x0e\n\nSTATE_IDLE\x10\x00\x12\x13\n\x0fSTATE_STREAMING\x10\x01\x12\x0f\n\x0bSTATE_ERROR\x10\x02\x62\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'PyModuleProt_pb2', globals())
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
+  _COMMAND._serialized_start=211
+  _COMMAND._serialized_end=289
+  _STATE._serialized_start=291
+  _STATE._serialized_end=352
   _DATAPACKET._serialized_start=36
-  _DATAPACKET._serialized_end=69
+  _DATAPACKET._serialized_end=124
+  _SENDCOMMAND._serialized_start=126
+  _SENDCOMMAND._serialized_end=209
 # @@protoc_insertion_point(module_scope)
