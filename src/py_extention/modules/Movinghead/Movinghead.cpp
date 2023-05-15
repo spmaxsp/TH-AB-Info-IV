@@ -1,0 +1,81 @@
+#include "PyModule.hpp"
+
+Movinghead::Movinghead() : shell_exec("python -u", "scripts/Movinghead.py", {}), client("127.0.0.1", 50009) {
+}
+
+Movinghead::~Movinghead() {
+    shell_exec.stop();
+}
+
+void Movinghead::run() {
+    shell_exec.run();
+}
+
+void Movinghead::stop() {
+    shell_exec.stop();
+}
+
+void Movinghead::connect() {
+    client.sockConnect();
+}
+
+void Movinghead::move_right(){
+    PyModuleProt::SendCommand pb;
+    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_RIGHT);
+    std::string data;
+    pb.SerializeToString(&data);
+    //std::string dbg = pb.DebugString();
+    //std::cout << "Debug: " << dbg << "\n";
+    client.sockSend(data);
+}
+
+void Movinghead::move_left(){
+    PyModuleProt::SendCommand pb;
+    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_LEFT);
+    std::string data;
+    pb.SerializeToString(&data);
+    //std::string dbg = pb.DebugString();
+    //std::cout << "Debug: " << dbg << "\n";
+    client.sockSend(data);
+}
+
+void Movinghead::move_up(){
+    PyModuleProt::SendCommand pb;
+    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_UP);
+    std::string data;
+    pb.SerializeToString(&data);
+    //std::string dbg = pb.DebugString();
+    //std::cout << "Debug: " << dbg << "\n";
+    client.sockSend(data);
+}
+
+void Movinghead::move_down(){
+    PyModuleProt::SendCommand pb;
+    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_DOWN);
+    std::string data;
+    pb.SerializeToString(&data);
+    //std::string dbg = pb.DebugString();
+    //std::cout << "Debug: " << dbg << "\n";
+    client.sockSend(data);
+}
+
+void Movinghead::move_normal(){
+    PyModuleProt::SendCommand pb;
+    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_NORMAL);
+    std::string data;
+    pb.SerializeToString(&data);
+    //std::string dbg = pb.DebugString();
+    //std::cout << "Debug: " << dbg << "\n";
+    client.sockSend(data);
+}
+
+void Movinghead::move_set_step(int value){
+    PyModuleProt::SendCommand pb;
+    pb.set_command(PyModuleProt::Command::COMMAND_SET_STEP);
+    pb.set_value(value)
+    std::string data;
+    pb.SerializeToString(&data);
+    //std::string dbg = pb.DebugString();
+    //std::cout << "Debug: " << dbg << "\n";
+    client.sockSend(data);
+}
