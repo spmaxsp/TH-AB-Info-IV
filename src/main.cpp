@@ -10,7 +10,9 @@
 //#include "py_extention/PyRunner.hpp"
 #include "py_extention/PyShellExec.hpp"
 //#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
-#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
+//#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
+#include "py_extention/modules/Movinghead/Movinghead.hpp"
+
 
 #include <Windows.h>
 
@@ -19,7 +21,7 @@ int main(int argc, char *argv[]) {
     LOG_INIT_CERR();
     
     log(LOG_INFO) << "Loading module\n";
-    Shimmersensor module;
+    Movinghead module;
 
     log(LOG_INFO) << "Running module\n";
     module.run();
@@ -29,24 +31,37 @@ int main(int argc, char *argv[]) {
     log(LOG_INFO) << "Connecting to module\n";
     module.connect();
 
-    Sleep(1000);
+    Sleep(3000);
 
-    log(LOG_INFO) << "Starting stream\n";
-    module.startStream();
-
-    Sleep(500);
-
-    log(LOG_INFO) << "Reading data\n";
-    for (int i = 0; i < 3; i++) {
-        module.readData();
-        Sleep(1000);
+    for(int i = 0; i < 4; i++) {
+        log(LOG_INFO) << "Moving right\n";
+        module.move_right();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving right\n";
+        module.move_right();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving up\n";
+        module.move_up();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving up\n";
+        module.move_up();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving left\n";
+        module.move_left();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving left\n";
+        module.move_left();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving down\n";
+        module.move_down();
+        Sleep(2000);
+        log(LOG_INFO) << "Moving down\n";
+        module.move_down();
+        Sleep(2000);
     }
 
-    log(LOG_INFO) << "Stopping stream\n";
-    module.stopStream();
-
     log(LOG_INFO) << "Stopping module\n";
-    module.stop();
+    //module.stop();
 
     return 0;
 }

@@ -1,4 +1,4 @@
-#include "PyModule.hpp"
+#include "Movinghead.hpp"
 
 Movinghead::Movinghead() : shell_exec("python -u", "scripts/Movinghead.py", {}), client("127.0.0.1", 50009) {
 }
@@ -20,8 +20,8 @@ void Movinghead::connect() {
 }
 
 void Movinghead::move_right(){
-    PyModuleProt::SendCommand pb;
-    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_RIGHT);
+    MovingheadProt::SendCommand pb;
+    pb.set_command(MovingheadProt::Command::COMMAND_MOVE_RIGHT);
     std::string data;
     pb.SerializeToString(&data);
     //std::string dbg = pb.DebugString();
@@ -30,8 +30,8 @@ void Movinghead::move_right(){
 }
 
 void Movinghead::move_left(){
-    PyModuleProt::SendCommand pb;
-    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_LEFT);
+    MovingheadProt::SendCommand pb;
+    pb.set_command(MovingheadProt::Command::COMMAND_MOVE_LEFT);
     std::string data;
     pb.SerializeToString(&data);
     //std::string dbg = pb.DebugString();
@@ -40,8 +40,8 @@ void Movinghead::move_left(){
 }
 
 void Movinghead::move_up(){
-    PyModuleProt::SendCommand pb;
-    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_UP);
+    MovingheadProt::SendCommand pb;
+    pb.set_command(MovingheadProt::Command::COMMAND_MOVE_UP);
     std::string data;
     pb.SerializeToString(&data);
     //std::string dbg = pb.DebugString();
@@ -50,8 +50,8 @@ void Movinghead::move_up(){
 }
 
 void Movinghead::move_down(){
-    PyModuleProt::SendCommand pb;
-    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_DOWN);
+    MovingheadProt::SendCommand pb;
+    pb.set_command(MovingheadProt::Command::COMMAND_MOVE_DOWN);
     std::string data;
     pb.SerializeToString(&data);
     //std::string dbg = pb.DebugString();
@@ -60,8 +60,8 @@ void Movinghead::move_down(){
 }
 
 void Movinghead::move_normal(){
-    PyModuleProt::SendCommand pb;
-    pb.set_command(PyModuleProt::Command::COMMAND_MOVE_NORMAL);
+    MovingheadProt::SendCommand pb;
+    pb.set_command(MovingheadProt::Command::COMMAND_MOVE_NORMAL);
     std::string data;
     pb.SerializeToString(&data);
     //std::string dbg = pb.DebugString();
@@ -70,9 +70,9 @@ void Movinghead::move_normal(){
 }
 
 void Movinghead::move_set_step(int value){
-    PyModuleProt::SendCommand pb;
-    pb.set_command(PyModuleProt::Command::COMMAND_SET_STEP);
-    pb.set_value(value)
+    MovingheadProt::SendCommand pb;
+    pb.set_command(MovingheadProt::Command::COMMAND_SET_STEP);
+    pb.set_value(value);
     std::string data;
     pb.SerializeToString(&data);
     //std::string dbg = pb.DebugString();

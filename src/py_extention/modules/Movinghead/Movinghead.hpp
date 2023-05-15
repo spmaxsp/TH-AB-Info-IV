@@ -8,7 +8,7 @@
 
 #include "../../../BSlogger.hpp"
 
-#include "proto/PyModuleProt.pb.h"
+#include "proto/MovingheadProt.pb.h"
 
 class Movinghead {
     private:
