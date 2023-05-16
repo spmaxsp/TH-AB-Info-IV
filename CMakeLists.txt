@@ -83,22 +83,48 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${Protobuf_INCLUDE_DIRS})
 
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
-#################### POST BUILD ####################
+#################### SHADERS ####################
 
-### copy Python dll
-#if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Python3_RUNTIME_LIBRARY_DIRS}/python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}.dll ${PROJECT_SOURCE_DIR}/bin)
-#endif()
+if (UNIX)
+add_custom_target(build_shaders ALL
+    COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.sh"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
+)
+endif(UNIX)
+
+if (WIN32)
+add_custom_target(build_shaders ALL
+    COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.bat"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
+)
+endif(WIN32)
+
+add_dependencies(${PROJECT_NAME} build_shaders)
+
+#################### COPY SHADERS ####################
+
+### copy shaders
+file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/shaders/*.spv)
+### display files
+message(STATUS "Shader files: ${SHADER_FILES}")
+### copy files
+add_custom_target(copy_shaders ALL
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILES} ${PROJECT_SOURCE_DIR}/bin/shaders
+                    COMMENT "Copying shaders to shaders directory" )
+
+add_dependencies(${PROJECT_NAME} copy_shaders)
+add_dependencies(copy_shaders build_shaders)
+
+#################### POST BUILD ####################
 
 ### copy Python scripts
 file(GLOB_RECURSE PY_FILES ${PROJECT_SOURCE_DIR}/src/py_extention/modules/*.py)
 ### display files
 message(STATUS "Python files: ${PY_FILES}")
 ### copy files
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy ${PY_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
-                    COMMENT "Copying Python modules to scripts directory"
-                    VERBATIM
-                    ALWAYS)
+add_custom_target(copy_py ALL
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PY_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
+                    COMMENT "Copying Python files to bin directory" )
+
+add_dependencies(${PROJECT_NAME} copy_py)
 
