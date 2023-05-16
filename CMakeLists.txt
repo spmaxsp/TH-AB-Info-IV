@@ -32,13 +32,13 @@ set(SOURCE_FILES
     src/vulkan_base/vulkan_swapchain.cpp
     src/vulkan_base/vulkan_renderpass.cpp
     src/vulkan_base/vulkan_cmdbuffer.cpp
+    src/vulkan_base/vulkan_pipeline.cpp
 )
 
 ####################  EXECUTABLE  ####################
 
 ### add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-
 
 #################### LIBRARIES ####################
 
@@ -56,16 +56,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIRS})
 find_package(Vulkan REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
-
-### include Python
-#find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-#target_link_libraries(${PROJECT_NAME} ${Python3_LIBRARIES})
-#target_include_directories(${PROJECT_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
-
-### include Python numpy
-#find_package(Python3 REQUIRED COMPONENTS NumPy)
-#target_link_libraries(${PROJECT_NAME} ${Python3_NumPy_LIBRARIES})
-#target_include_directories(${PROJECT_NAME} PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
 
 ### include socket (dll)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

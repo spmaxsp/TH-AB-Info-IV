@@ -45,7 +45,10 @@ class VulkanApp {
         VkSurfaceKHR surface;
         VulkanSwapchain swapchain;
         VulkanRenderPass renderPass;
-        VkFence fence;
+        VulkanPipeline pipeline;
+        VkFence commandBufferFence;
+        VkSemaphore imageAvailableSemaphore;
+        VkSemaphore renderFinishedSemaphore;
         VulkanCommandBuffer commandBuffer;
 };
 
@@ -88,10 +91,18 @@ void VulkanApp::InitVulkan(SDL_Window* window){
     swapchain.createSwapchain(&context, surface, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     // Create Render Pass
     renderPass.createRenderPass(&context, &swapchain);
+    // Create Pipeline
+    pipeline.createPipeline(&context, &renderPass, "./shaders/triangle_vert.spv", "./shaders/triangle_frag.spv", swapchain.extent);
 
     // Create Fence
     VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-    VKA(vkCreateFence(context.device, &fenceInfo, nullptr, &fence));
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    VKA(vkCreateFence(context.device, &fenceInfo, nullptr, &commandBufferFence));
+
+    // Create Semaphores
+    VkSemaphoreCreateInfo semaphoreInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+    VKA(vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphore));
+    VKA(vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphore));
 
     // Create Command Buffer
     commandBuffer.createCommandBuffer(&context, &swapchain, &renderPass);
@@ -103,10 +114,13 @@ void VulkanApp::ExitVulkan() {
 
     VKA(vkDeviceWaitIdle(context.device));
 
-    VK(vkDestroyFence(context.device, fence, nullptr));
+    VK(vkDestroySemaphore(context.device, renderFinishedSemaphore, nullptr));
+    VK(vkDestroySemaphore(context.device, imageAvailableSemaphore, nullptr));
+    VK(vkDestroyFence(context.device, commandBufferFence, nullptr));
 
     commandBuffer.destroyCommandBuffer();
 
+    pipeline.destroyPipeline();
     renderPass.destroyRenderPass();
     swapchain.destroySwapchain();
     context.destroyVulkanContext();
@@ -118,9 +132,10 @@ void VulkanApp::render() {
 	if (greenChannel > 1.0f) greenChannel = 0.0f;
 
 	uint32_t imageIndex = 0;
-    VKA(vkResetFences(context.device, 1, &fence));
-    VKA(vkAcquireNextImageKHR(context.device, swapchain.swapchain, UINT64_MAX, VK_NULL_HANDLE, fence, &imageIndex));
+    VKA(vkAcquireNextImageKHR(context.device, swapchain.swapchain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex));
 
+    VKA(vkWaitForFences(context.device, 1, &commandBufferFence, VK_TRUE, UINT64_MAX));  // Wait for command buffer to finish
+    VKA(vkResetFences(context.device, 1, &commandBufferFence));                         // Reset fence
     VKA(vkResetCommandPool(context.device, commandBuffer.commandPool, 0));
 
     VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
@@ -138,24 +153,30 @@ void VulkanApp::render() {
         renderPassInfo.pClearValues = &clearValue;
         vkCmdBeginRenderPass(commandBuffer.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+        vkCmdBindPipeline(commandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
+        vkCmdDraw(commandBuffer.commandBuffer, 3, 1, 0, 0);
+
         vkCmdEndRenderPass(commandBuffer.commandBuffer);
     }
     VKA(vkEndCommandBuffer(commandBuffer.commandBuffer));
 
-    VKA(vkWaitForFences(context.device, 1, &fence, VK_TRUE, UINT64_MAX));
-    VKA(vkResetFences(context.device, 1, &fence));
-
     VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
 	submitInfo.commandBufferCount = 1;
 	submitInfo.pCommandBuffers = &commandBuffer.commandBuffer;
-    VKA(vkQueueSubmit(context.graphicsQueue.queue, 1, &submitInfo, fence));
-
-    VKA(vkDeviceWaitIdle(context.device));
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = &imageAvailableSemaphore;    // Wait for an image to render to be available
+    VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &renderFinishedSemaphore;  // Signal when rendering has finished
+    VKA(vkQueueSubmit(context.graphicsQueue.queue, 1, &submitInfo, commandBufferFence)); // Submit command buffer
 
     VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain.swapchain;
     presentInfo.pImageIndices = &imageIndex;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &renderFinishedSemaphore;  // Wait for rendering to be finished
     VK(vkQueuePresentKHR(context.graphicsQueue.queue, &presentInfo));
 }
 

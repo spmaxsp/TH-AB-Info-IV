@@ -3,6 +3,7 @@
 #include "../BSlogger.hpp"
 #include <vulkan/vulkan.h>
 #include <cassert>
+#include <fstream>
 
 #define ASSERT_VULKAN(val) if(val != VK_SUCCESS) {assert(false);}
 #ifndef VK
@@ -46,10 +47,11 @@ class VulkanContext {
 };
 
 class VulkanSwapchain {
-    public:
+    private:
         VulkanContext* context;
         VkSurfaceKHR surface;
 
+    public:
         VkSwapchainKHR swapchain;
         VkExtent2D extent;
         VkFormat format;
@@ -71,10 +73,11 @@ class VulkanSwapchain {
 };
 
 class VulkanRenderPass {
-    public:
+    private:
         VulkanContext* context;
         VulkanSwapchain* swapchain;
 
+    public:
         VkRenderPass renderPass;
         std::vector<VkFramebuffer> framebuffers;
 
@@ -91,11 +94,12 @@ class VulkanRenderPass {
 
 
 class VulkanCommandBuffer {
-    public:
+    private:
         VulkanContext* context;
         VulkanSwapchain* swapchain;
         VulkanRenderPass* renderPass;
 
+    public:
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
 
@@ -113,6 +117,28 @@ class VulkanCommandBuffer {
             renderPass = nullptr; 
             commandPool = VK_NULL_HANDLE; 
             commandBuffer = VK_NULL_HANDLE;
+        }
+};
+
+
+class VulkanPipeline {
+    private:
+        VulkanContext* context;
+        VulkanRenderPass* renderPass;
+
+        VkShaderModule createShaderModule(const char* filename);
+    public:
+        VkPipelineLayout pipelineLayout;
+        VkPipeline graphicsPipeline;
+
+        void createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent);
+        void destroyPipeline();
+
+        VulkanPipeline(){ 
+            context = nullptr; 
+            renderPass = nullptr; 
+            pipelineLayout = VK_NULL_HANDLE; 
+            graphicsPipeline = VK_NULL_HANDLE;
         }
 };
 
