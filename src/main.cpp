@@ -14,6 +14,8 @@
 
 #include <Windows.h>
 
+#define ShimmerRate 30 //Hz
+
 int main(int argc, char *argv[]) {
     // Initializing logger
     LOG_INIT_CERR();
@@ -37,9 +39,9 @@ int main(int argc, char *argv[]) {
     Sleep(500);
 
     log(LOG_INFO) << "Reading data\n";
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 300; i++) {
         module.readData();
-        Sleep(1000);
+        Sleep(1000 / ShimmerRate);
     }
 
     log(LOG_INFO) << "Stopping stream\n";
