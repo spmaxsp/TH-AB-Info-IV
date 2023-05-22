@@ -40,7 +40,7 @@ class Shimmersensor:
     def StarteSensor(self):
         print("Starting sensor...")
         print("Connecting to bluetooth device...")
-        serial = Serial('COM5', DEFAULT_BAUDRATE)
+        serial = Serial('COM7', DEFAULT_BAUDRATE)
         shim_dev = ShimmerBluetooth(serial)
 
         print("Initializing sensor...")
