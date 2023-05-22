@@ -53,9 +53,9 @@ void Shimmersensor::readData() {
     else {
         ShimmersensorProt::DataPacket pb;
         pb.ParseFromString(data);
-        int accel_ln_x = pb.accel_ln_x();
-        int accel_ln_y = pb.accel_ln_y();
-        int accel_ln_z = pb.accel_ln_z();
+        accel_ln_x = pb.accel_ln_x();
+        accel_ln_y = pb.accel_ln_y();
+        accel_ln_z = pb.accel_ln_z();
         log(LOG_INFO) << "Data:  (x):" << accel_ln_x << "  (y):" << accel_ln_y << "  (z):" << accel_ln_x << "\n";
     }
 }

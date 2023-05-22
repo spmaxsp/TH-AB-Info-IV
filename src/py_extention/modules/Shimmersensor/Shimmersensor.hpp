@@ -27,4 +27,8 @@ class Shimmersensor {
         void stopStream();
 
         void readData();
+
+        int accel_ln_x;
+        int accel_ln_y;
+        int accel_ln_z;
 };
