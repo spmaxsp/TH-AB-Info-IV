@@ -56,8 +56,7 @@ async def movingheadctr():
 
 
     #Einstellung der Parameter für die Kanäle (am Start):
-    #als globale Variablen:
-    panwert = 5
+    panwert = 85
     tiltwert = 15
 
     channel_gobo.set_values([0])        #Gobo offen
@@ -76,60 +75,75 @@ async def movingheadctr():
         #Ausrichtung des Moving-Head entsprchend des Eingangswert:
         if rechts:
             print("rechts")
-            if panwert == 0:
-                panwert = 170
-            channel_pan.set_values([panwert - parameter]) #Weiterdrehen
+            if panwert < parameter:
+                panwert = 170 - parameter + panwert
+                channel_pan.set_values([panwert])
+            else:
+                channel_pan.set_values([panwert - parameter])  #Weiterdrehen
+                panwert = panwert - parameter
             await asyncio.sleep(0.1)
-            panwert = panwert-parameter
             rechts = False
 
         if oben:
             print("oben")
-            if tiltwert >= 127:#da Senkrechte ansonsten überschritten wird (sonst dreht sich oben unten (125->5))
-                if panwert >170: #Ansonsten wird 255 mit 180° Drehung überschritten
+            if tiltwert + parameter > 127:#da Senkrechte ansonsten überschritten wird (sonst dreht sich oben unten)
+                if panwert > 170: #Verhinderung Wertebereichsüberschreitung
                     panwert = panwert - 85 #Drehung um 180° zurück
                     channel_pan.set_values([panwert])
                     await asyncio.sleep(0.1)
-                    tiltwert = 127 #125 bei 5er Schritten
+                    tiltwert = 127  #127 - parameter + 127 - tiltwert
                     channel_tilt.set_values([tiltwert])
                     await asyncio.sleep(0.1)
                     oben = False
-
                 else:
                     panwert = panwert + 85  #Drehung um 180° vor
                     channel_pan.set_values([panwert])
                     await asyncio.sleep(0.1)
-                    tiltwert = 127 #125->5
+                    tiltwert = 127  #127 - parameter + 127 - tiltwert
                     channel_tilt.set_values([tiltwert])
                     await asyncio.sleep(0.1)
                     oben = False
-
             else:#Weiterkippen verhindern wenn Senkrechte überschritten
                 channel_tilt.set_values([tiltwert + parameter])
                 await asyncio.sleep(0.1)
                 tiltwert = tiltwert + parameter
                 oben = False
 
+
+
         if unten:
             print("unten")
-            if tiltwert != 0: #Verhindern das Tilt unter 0 gelangt
+            if tiltwert >= parameter: #Verhindern das Tilt unter 0 gelangt
                 channel_tilt.set_values([tiltwert - parameter])
                 await asyncio.sleep(0.1)
                 tiltwert = tiltwert - parameter
                 unten = False
+            else:
+                tiltwert = 0
+                channel_tilt.set_values([tiltwert])
+                await asyncio.sleep(0.1)
+                unten = False
+
+
 
         if links:
             print("links")
-            if panwert == 170:
-                panwert = 5 #Startposition wird wieder eingenommen
-            channel_pan.set_values([panwert + parameter])
-            await asyncio.sleep(0.1)
-            panwert = panwert + parameter
-            links = False
+            if panwert + parameter > 255:
+                panwert = panwert - 170 + parameter
+                channel_pan.set_values([panwert])
+                await asyncio.sleep(0.1)
+                links = False
+            else:
+                channel_pan.set_values([panwert + parameter])
+                await asyncio.sleep(0.1)
+                panwert = panwert + parameter
+                links = False
+
+
 
         if normal:
             print("normal")
-            panwert = 5
+            panwert = 85
             tiltwert = 15
             channel_pan.set_values([panwert])
             channel_tilt.set_values([tiltwert])
