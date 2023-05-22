@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package MovingheadProt;
+
+enum Command {
+  COMMAND_NOOP = 0;
+  COMMAND_MOVE_RIGHT = 1;
+  COMMAND_MOVE_LEFT = 2;
+  COMMAND_MOVE_UP = 3;
+  COMMAND_MOVE_DOWN = 4;
+  COMMAND_MOVE_NORMAL = 5;
+  COMMAND_SET_STEP = 6;
+}
+
+enum State {
+  STATE_IDLE = 0;
+  STATE_STREAMING = 1;
+  STATE_ERROR = 2;
+}
+
+message DataPacket {
+  State state = 1;
+  string timestamp = 2;
+}
+
+message SendCommand {
+  Command command = 1;
+  optional int32 value = 2;
+}
