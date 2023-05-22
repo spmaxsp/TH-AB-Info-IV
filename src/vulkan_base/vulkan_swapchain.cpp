@@ -61,6 +61,7 @@ void VulkanSwapchain::createSwapchain(VulkanContext* context, VkSurfaceKHR surfa
     swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchainCreateInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    swapchainCreateInfo.oldSwapchain = oldSwapchain;
     VKA(vkCreateSwapchainKHR(context->device, &swapchainCreateInfo, nullptr, &swapchain));
 
     // Get swapchain images
@@ -81,6 +82,40 @@ void VulkanSwapchain::createSwapchain(VulkanContext* context, VkSurfaceKHR surfa
         imageViewCreateInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
         VKA(vkCreateImageView(context->device, &imageViewCreateInfo, nullptr, &imageViews[i]));
     }
+}
+
+int VulkanSwapchain::recreateSwapchain(VkImageUsageFlags usageFlags) {
+
+    // Check minimized
+    VkSurfaceCapabilitiesKHR surfaceCapabilities;
+    VKA(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(context->physicalDevice, surface, &surfaceCapabilities));
+    if (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF || surfaceCapabilities.currentExtent.height == 0xFFFFFFFF) {
+        return 0;
+    }
+    else if (surfaceCapabilities.currentExtent.width == 0 || surfaceCapabilities.currentExtent.height == 0) {
+        return 0;
+    }
+
+    // Keep old swapchain if it exists
+    oldSwapchain = swapchain;
+
+    // Wait for device to be idle
+    VK(vkDeviceWaitIdle(context->device));
+
+    // Destroy old image views
+    for (auto& imageView : imageViews) {
+        VK(vkDestroyImageView(context->device, imageView, nullptr));
+    }
+
+    // Create new swapchain + image views
+    createSwapchain(context, surface, usageFlags);
+
+    // Destroy old swapchain
+    if (oldSwapchain != VK_NULL_HANDLE) {
+        VK(vkDestroySwapchainKHR(context->device, oldSwapchain, nullptr));
+    }
+
+    return 1;
 }
 
 void VulkanSwapchain::destroySwapchain() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../BSlogger.hpp"
+#include <BSlogger.hpp>
 #include <vulkan/vulkan.h>
 #include <cassert>
 #include <fstream>
@@ -53,6 +53,7 @@ class VulkanSwapchain {
 
     public:
         VkSwapchainKHR swapchain;
+        VkSwapchainKHR oldSwapchain;
         VkExtent2D extent;
         VkFormat format;
         std::vector<VkImage> images;
@@ -61,10 +62,13 @@ class VulkanSwapchain {
         void createSwapchain(VulkanContext* context, VkSurfaceKHR surface, VkImageUsageFlags usageFlags);
         void destroySwapchain();
 
+        int recreateSwapchain(VkImageUsageFlags usageFlags);
+
         VulkanSwapchain(){ 
             context = nullptr; 
             surface = VK_NULL_HANDLE; 
-            swapchain = VK_NULL_HANDLE; 
+            swapchain = VK_NULL_HANDLE;
+            oldSwapchain = VK_NULL_HANDLE; 
             extent = {0,0}; 
             format = VK_FORMAT_UNDEFINED; 
             images = {};
@@ -83,6 +87,8 @@ class VulkanRenderPass {
 
         void createRenderPass(VulkanContext* context, VulkanSwapchain* swapchain);
         void destroyRenderPass();
+
+        void recreateRenderPass();
 
         VulkanRenderPass(){ 
             context = nullptr; 

@@ -69,6 +69,12 @@ find_package(Protobuf REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${Protobuf_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Protobuf_INCLUDE_DIRS})
 
+### Vulkan Memory Allocator (header only)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/vma)
+
+### Logger (header only)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/bslogger)
+
 #################### COMPILE OPTIONS ####################
 
 set(CMAKE_EXE_LINKER_FLAGS "-static")

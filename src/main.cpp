@@ -1,18 +1,30 @@
 #include <stdlib.h>
+
 #include <SDL.h>
 #include <SDL_vulkan.h>
+
 #include <vulkan/vulkan.h>
 
 #include "vulkan_base/vulkan_base.hpp"
 
-#include "BSlogger.hpp"
+#define VMA_IMPLEMENTATION
+#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
+#include <vk_mem_alloc.h>
+
+#include <BSlogger.hpp>
 
 //#include "py_extention/PyRunner.hpp"
 #include "py_extention/PyShellExec.hpp"
-#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
+//#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
 //#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
 
-#include <Windows.h>
+#ifdef _WIN32
+    #include <Windows.h>
+#else
+    #include <unistd.h>
+    #define Sleep(x) usleep((x)*1000)
+#endif
 
 #define _DEBUG
 
@@ -41,6 +53,7 @@ class VulkanApp {
 
         void render();
     private:
+        static const int MAX_FRAMES_IN_FLIGHT = 2;
         VulkanContext context;
         VkSurfaceKHR surface;
         VulkanSwapchain swapchain;
@@ -49,7 +62,8 @@ class VulkanApp {
         VkFence commandBufferFence;
         VkSemaphore imageAvailableSemaphore;
         VkSemaphore renderFinishedSemaphore;
-        VulkanCommandBuffer commandBuffer;
+        std::vector<VulkanCommandBuffer> commandBuffers;
+        VmaAllocator allocator;
 };
 
 void VulkanApp::InitVulkan(SDL_Window* window){
@@ -104,9 +118,18 @@ void VulkanApp::InitVulkan(SDL_Window* window){
     VKA(vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &imageAvailableSemaphore));
     VKA(vkCreateSemaphore(context.device, &semaphoreInfo, nullptr, &renderFinishedSemaphore));
 
-    // Create Command Buffer
-    commandBuffer.createCommandBuffer(&context, &swapchain, &renderPass);
+    // Create Command Buffers/Pools
+    commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    for (auto& commandBuffer : commandBuffers){
+        commandBuffer.createCommandBuffer(&context, &swapchain, &renderPass);
+    }
 
+    // Create Allocator
+    VmaAllocatorCreateInfo allocatorInfo = {};
+    allocatorInfo.physicalDevice = context.physicalDevice;
+    allocatorInfo.device = context.device;
+    allocatorInfo.instance = context.instance;
+    vmaCreateAllocator(&allocatorInfo, &allocator);
 }
 
 
@@ -114,11 +137,15 @@ void VulkanApp::ExitVulkan() {
 
     VKA(vkDeviceWaitIdle(context.device));
 
+    vmaDestroyAllocator(allocator);
+
     VK(vkDestroySemaphore(context.device, renderFinishedSemaphore, nullptr));
     VK(vkDestroySemaphore(context.device, imageAvailableSemaphore, nullptr));
     VK(vkDestroyFence(context.device, commandBufferFence, nullptr));
 
-    commandBuffer.destroyCommandBuffer();
+    for (auto& commandBuffer : commandBuffers) {
+        commandBuffer.destroyCommandBuffer();
+    }
 
     pipeline.destroyPipeline();
     renderPass.destroyRenderPass();
@@ -127,21 +154,43 @@ void VulkanApp::ExitVulkan() {
 }
 
 void VulkanApp::render() {
+    LOG_INIT_CERR();
+
     static float greenChannel = 0.0f;
 	greenChannel += 0.01f;
 	if (greenChannel > 1.0f) greenChannel = 0.0f;
 
 	uint32_t imageIndex = 0;
-    VKA(vkAcquireNextImageKHR(context.device, swapchain.swapchain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex));
+    static uint32_t bufferIndex = 0;
+    VulkanCommandBuffer& commandBuffer = commandBuffers[bufferIndex];
 
     VKA(vkWaitForFences(context.device, 1, &commandBufferFence, VK_TRUE, UINT64_MAX));  // Wait for command buffer to finish
     VKA(vkResetFences(context.device, 1, &commandBufferFence));                         // Reset fence
+
+    VkResult result = VK(vkAcquireNextImageKHR(context.device, swapchain.swapchain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex));
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        if (swapchain.recreateSwapchain(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+            renderPass.recreateRenderPass();
+        }
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        log(LOG_ERROR) << "Failed to acquire swapchain image\n";
+        return;
+    }
+
     VKA(vkResetCommandPool(context.device, commandBuffer.commandPool, 0));
 
     VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     VKA(vkBeginCommandBuffer(commandBuffer.commandBuffer, &beginInfo));
     {
+        VkViewport viewport = { 0.0f, 0.0f, (float)swapchain.extent.width, (float)swapchain.extent.height };
+        VkRect2D scissor = { {0, 0}, swapchain.extent };
+
+        vkCmdSetViewport(commandBuffer.commandBuffer, 0, 1, &viewport);
+		vkCmdSetScissor(commandBuffer.commandBuffer, 0, 1, &scissor);
+
         VkClearValue clearValue = { 1.0f, greenChannel, 0.0f, 1.0f };
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -177,7 +226,17 @@ void VulkanApp::render() {
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = &renderFinishedSemaphore;  // Wait for rendering to be finished
-    VK(vkQueuePresentKHR(context.graphicsQueue.queue, &presentInfo));
+    result = VK(vkQueuePresentKHR(context.graphicsQueue.queue, &presentInfo));
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+        if (swapchain.recreateSwapchain(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)) {
+            renderPass.recreateRenderPass();
+        }
+    }
+    else if (result != VK_SUCCESS) {
+        log(LOG_ERROR) << "Failed to present swapchain image\n";
+    }
+
+    bufferIndex = (bufferIndex + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 

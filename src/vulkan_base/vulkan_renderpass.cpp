@@ -49,10 +49,13 @@ void VulkanRenderPass::createRenderPass(VulkanContext* context, VulkanSwapchain*
     }
 }
 
+void VulkanRenderPass::recreateRenderPass(){
+    destroyRenderPass();
+    createRenderPass(context, swapchain);
+}
+
 void VulkanRenderPass::destroyRenderPass() {
     LOG_INIT_CERR();
-
-
 
     log(LOG_INFO) << "Destroying framebuffers...\n";
     for (size_t i = 0; i < framebuffers.size(); i++) {
