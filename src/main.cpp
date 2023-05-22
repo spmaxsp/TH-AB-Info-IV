@@ -16,6 +16,8 @@
 
 #include <Windows.h>
 
+#define ShimmerRate 30 //Hz
+
 int main(int argc, char *argv[]) {
     // Initializing logger
     LOG_INIT_CERR();
@@ -33,6 +35,7 @@ int main(int argc, char *argv[]) {
 
     Sleep(3000);
 
+<<<<<<< src/main.cpp
     for(int i = 0; i < 4; i++) {
         log(LOG_INFO) << "Moving right\n";
         module.move_right();
@@ -58,6 +61,14 @@ int main(int argc, char *argv[]) {
         log(LOG_INFO) << "Moving down\n";
         module.move_down();
         Sleep(2000);
+=======
+    Sleep(500);
+
+    log(LOG_INFO) << "Reading data\n";
+    for (int i = 0; i < 800; i++) {
+        module.readData();
+        Sleep(1000 / ShimmerRate);
+>>>>>>> src/main.cpp
     }
 
     log(LOG_INFO) << "Stopping module\n";
