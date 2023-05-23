@@ -99,17 +99,19 @@ add_dependencies(${PROJECT_NAME} build_shaders)
 
 #################### COPY SHADERS ####################
 
-### copy shaders
+### Copy shaders
 file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/shaders/*.spv)
-### display files
+### Display files
 message(STATUS "Shader files: ${SHADER_FILES}")
-### copy files
-add_custom_target(copy_shaders ALL
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILES} ${PROJECT_SOURCE_DIR}/bin/shaders
-                    COMMENT "Copying shaders to shaders directory" )
 
+### Copy files
+add_custom_target(copy_shaders ALL
+    COMMENT "Copying shaders to shaders directory"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILES} ${PROJECT_SOURCE_DIR}/bin/shaders
+    DEPENDS build_shaders)
+
+### Add dependencies
 add_dependencies(${PROJECT_NAME} copy_shaders)
-add_dependencies(copy_shaders build_shaders)
 
 #################### POST BUILD ####################
 
