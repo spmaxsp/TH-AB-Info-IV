@@ -33,6 +33,7 @@ set(SOURCE_FILES
     src/vulkan_base/vulkan_renderpass.cpp
     src/vulkan_base/vulkan_cmdbuffer.cpp
     src/vulkan_base/vulkan_pipeline.cpp
+    src/vulkan_base/vulkan_utils.cpp
 )
 
 ####################  EXECUTABLE  ####################
@@ -68,6 +69,11 @@ endif()
 find_package(Protobuf REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${Protobuf_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Protobuf_INCLUDE_DIRS})
+
+### include opencv2
+find_package(OpenCV REQUIRED)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 ### Vulkan Memory Allocator (header only)
 target_include_directories(${PROJECT_NAME} PRIVATE libs/vma)
