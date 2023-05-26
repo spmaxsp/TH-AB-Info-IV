@@ -5,10 +5,12 @@
 
 #include <vulkan/vulkan.h>
 
+#include <opencv2/opencv.hpp>
+
 #include "vulkan_base/vulkan_base.hpp"
 
 #define VMA_IMPLEMENTATION
-#define VMA_STATIC_VULKAN_FUNCTIONS 0
+#define VMA_STATIC_VULKAN_FUNCTIONS 1
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include <vk_mem_alloc.h>
 
@@ -43,6 +45,25 @@ bool handleEvents() {
     return true;
 }
 
+float vertexData[] = {
+	0.5f, -0.5f,
+	1.0f, 0.0f, 0.0f,
+
+	0.5f, 0.5f,
+	0.0f, 1.0f, 0.0f,
+
+	-0.5f, 0.5f,
+	0.0f, 0.0f, 1.0f,
+
+	-0.5f, -0.5f,
+	0.0f, 1.0f, 0.0f,
+};
+
+uint32_t indexData[] = {
+	0, 1, 2,
+	3, 0, 2,
+};
+
 class VulkanApp {
     public:
         VulkanApp(){  
@@ -51,7 +72,7 @@ class VulkanApp {
         void InitVulkan(SDL_Window* window);
         void ExitVulkan();
 
-        void render();
+        void render(cv::Mat&);
     private:
         static const int MAX_FRAMES_IN_FLIGHT = 2;
         VulkanContext context;
@@ -59,11 +80,17 @@ class VulkanApp {
         VulkanSwapchain swapchain;
         VulkanRenderPass renderPass;
         VulkanPipeline pipeline;
+
         VkFence commandBufferFence;
         VkSemaphore imageAvailableSemaphore;
         VkSemaphore renderFinishedSemaphore;
+
         std::vector<VulkanCommandBuffer> commandBuffers;
+
         VmaAllocator allocator;
+        VulkanBuffer vertexBuffer;
+        VulkanBuffer indexBuffer;
+        VulkanImgBuffer webcamBuffer;
 };
 
 void VulkanApp::InitVulkan(SDL_Window* window){
@@ -103,10 +130,25 @@ void VulkanApp::InitVulkan(SDL_Window* window){
 
     // Create Swapchain
     swapchain.createSwapchain(&context, surface, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
     // Create Render Pass
     renderPass.createRenderPass(&context, &swapchain);
+
     // Create Pipeline
-    pipeline.createPipeline(&context, &renderPass, "./shaders/triangle_vert.spv", "./shaders/triangle_frag.spv", swapchain.extent);
+    VkVertexInputAttributeDescription vertexAttributeDescriptions[2] = {};
+	vertexAttributeDescriptions[0].binding = 0;
+	vertexAttributeDescriptions[0].location = 0;
+	vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+	vertexAttributeDescriptions[0].offset = 0;
+	vertexAttributeDescriptions[1].binding = 0;
+	vertexAttributeDescriptions[1].location = 1;
+	vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+	vertexAttributeDescriptions[1].offset = sizeof(float) * 2;
+	VkVertexInputBindingDescription vertexInputBinding = {};
+	vertexInputBinding.binding = 0;
+	vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	vertexInputBinding.stride = sizeof(float) * 5;
+    pipeline.createPipeline(&context, &renderPass, "./shaders/color_vert.spv", "./shaders/color_frag.spv", swapchain.extent, vertexAttributeDescriptions, 2, &vertexInputBinding);
 
     // Create Fence
     VkFenceCreateInfo fenceInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
@@ -130,30 +172,62 @@ void VulkanApp::InitVulkan(SDL_Window* window){
     allocatorInfo.device = context.device;
     allocatorInfo.instance = context.instance;
     vmaCreateAllocator(&allocatorInfo, &allocator);
+
+    // Create Vertex Buffer
+    vertexBuffer.createBuffer(&allocator, sizeof(vertexData), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+
+    // Create Index Buffer
+    indexBuffer.createBuffer(&allocator, sizeof(indexData), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+
+    // Copy Vertex Data
+    memcpy(vertexBuffer.BufferMemory, vertexData, sizeof(vertexData));
+
+    // Copy Index Data
+    memcpy(indexBuffer.BufferMemory, indexData, sizeof(indexData));
+
+    // Create Image Buffer
+    webcamBuffer.createImgBuffer(&allocator, &context, sizeof(imageData), VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 }
 
 
 void VulkanApp::ExitVulkan() {
 
+    // Wait for device to be idle
     VKA(vkDeviceWaitIdle(context.device));
 
+    // Destroy vertex buffer
+    vertexBuffer.destroyBuffer();
+
+    // Destroy index buffer
+    indexBuffer.destroyBuffer();
+
+    // Destroy allocator
     vmaDestroyAllocator(allocator);
 
+    // Destroy semaphores
     VK(vkDestroySemaphore(context.device, renderFinishedSemaphore, nullptr));
     VK(vkDestroySemaphore(context.device, imageAvailableSemaphore, nullptr));
     VK(vkDestroyFence(context.device, commandBufferFence, nullptr));
 
+    // Destroy command buffers
     for (auto& commandBuffer : commandBuffers) {
         commandBuffer.destroyCommandBuffer();
     }
 
+    // Destroy pipeline
     pipeline.destroyPipeline();
+
+    // Destroy render pass
     renderPass.destroyRenderPass();
+
+    // Destroy swapchain
     swapchain.destroySwapchain();
+
+    // Destroy surface
     context.destroyVulkanContext();
 }
 
-void VulkanApp::render() {
+void VulkanApp::render(cv::Mat& image) {
     LOG_INIT_CERR();
 
     static float greenChannel = 0.0f;
@@ -203,7 +277,11 @@ void VulkanApp::render() {
         vkCmdBeginRenderPass(commandBuffer.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         vkCmdBindPipeline(commandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
-        vkCmdDraw(commandBuffer.commandBuffer, 3, 1, 0, 0);
+        
+        VkDeviceSize offset = 0;
+        vkCmdBindVertexBuffers(commandBuffer.commandBuffer, 0, 1, &vertexBuffer.Buffer, &offset);
+        vkCmdBindIndexBuffer(commandBuffer.commandBuffer, indexBuffer.Buffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdDrawIndexed(commandBuffer.commandBuffer, 6, 1, 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer.commandBuffer);
     }
@@ -264,7 +342,19 @@ int main(int, char**) {
 
     // run Main Loop
     while (handleEvents()) {
-        app.render();
+        // Capture webcam image using OpenCV
+        //cv::VideoCapture cap(0);
+        //cv::Mat webcamImage;
+        //cap.read(webcamImage);
+
+        // Convert the image format if necessary (e.g., from BGR to RGBA)
+        //cv::Mat convertedImage;
+        //cv::cvtColor(webcamImage, convertedImage, cv::COLOR_BGR2RGBA);
+
+        cv::Mat cvImage(300, 500, CV_8UC3, cv::Scalar(255, 0, 0));
+
+        // Render Vulkan
+        app.render(cvImage);
     }
     
     // Exit Vulkan

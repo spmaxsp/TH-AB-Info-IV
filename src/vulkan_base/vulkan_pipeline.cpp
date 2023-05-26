@@ -26,7 +26,7 @@ VkShaderModule VulkanPipeline::createShaderModule(const char* shaderFilename){
     return shaderModule;
 }
 
-void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent) {
+void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent, VkVertexInputAttributeDescription* attributes, uint32_t numAttributes, VkVertexInputBindingDescription* binding) {
     LOG_INIT_CERR();
 
     this->context = context;
@@ -50,6 +50,10 @@ void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* re
 
     // Create Vertex Input
     VkPipelineVertexInputStateCreateInfo vertexInputInfo = { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
+    vertexInputInfo.vertexBindingDescriptionCount = binding ? 1 : 0;
+    vertexInputInfo.pVertexBindingDescriptions = binding;
+    vertexInputInfo.vertexAttributeDescriptionCount = numAttributes;
+    vertexInputInfo.pVertexAttributeDescriptions = attributes;
 
     // Create Input Assembly
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
