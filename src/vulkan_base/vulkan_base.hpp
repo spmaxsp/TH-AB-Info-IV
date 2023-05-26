@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 #include <cassert>
 #include <fstream>
+#include <vk_mem_alloc.h>
 
 #define ASSERT_VULKAN(val) if(val != VK_SUCCESS) {assert(false);}
 #ifndef VK
@@ -137,7 +138,7 @@ class VulkanPipeline {
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
 
-        void createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent);
+        void createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent, VkVertexInputAttributeDescription* attributes, uint32_t numAttributes, VkVertexInputBindingDescription* binding);
         void destroyPipeline();
 
         VulkanPipeline(){ 
@@ -145,6 +146,48 @@ class VulkanPipeline {
             renderPass = nullptr; 
             pipelineLayout = VK_NULL_HANDLE; 
             graphicsPipeline = VK_NULL_HANDLE;
+        }
+};
+
+class VulkanBuffer {
+    private:
+        VmaAllocator* allocator;
+        
+    public:
+        VkBuffer Buffer;
+        VmaAllocation BufferAllocation;
+        void* BufferMemory;
+
+        void createBuffer(VmaAllocator* allocator, int size, VkBufferUsageFlags usage);
+        void destroyBuffer();
+
+        VulkanBuffer(){ 
+            allocator = VK_NULL_HANDLE; 
+            Buffer = VK_NULL_HANDLE; 
+            BufferAllocation = VK_NULL_HANDLE; 
+            BufferMemory = nullptr;            
+        }
+};
+
+class VulkanImgBuffer {
+    private:
+        VmaAllocator* allocator;
+        VulkanContext* context;
+
+        VkImage Image;
+        VkImageView ImageView;
+        VmaAllocation ImageAllocation;
+        VkSampler Sampler;
+        void* ImageMemory;
+
+    public:	
+        void createImgBuffer(VmaAllocator* allocator, VulkanContext* context, VkExtent3D extent, VkFormat format, VkImageUsageFlags usage);
+        void destroyImgBuffer();
+
+        VulkanImgBuffer(){ 
+            allocator = VK_NULL_HANDLE; 
+            Image = VK_NULL_HANDLE; 
+            ImageAllocation = VK_NULL_HANDLE; 
         }
 };
 
