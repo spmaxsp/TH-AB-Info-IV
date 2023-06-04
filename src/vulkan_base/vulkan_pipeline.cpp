@@ -26,7 +26,7 @@ VkShaderModule VulkanPipeline::createShaderModule(const char* shaderFilename){
     return shaderModule;
 }
 
-void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent, VkVertexInputAttributeDescription* attributes, uint32_t numAttributes, VkVertexInputBindingDescription* binding) {
+void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent, VkVertexInputAttributeDescription* attributes, uint32_t numAttributes, VkVertexInputBindingDescription* binding, VkDescriptorSetLayout* SetLayouts, uint32_t setLayoutCount) {
     LOG_INIT_CERR();
 
     this->context = context;
@@ -75,6 +75,13 @@ void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* re
     // Create Color Blending
     VkPipelineColorBlendAttachmentState colorBlendAttachment = {};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachment.blendEnable = VK_TRUE;
+	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
     VkPipelineColorBlendStateCreateInfo colorBlending = { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
     colorBlending.attachmentCount = 1;
@@ -82,6 +89,8 @@ void VulkanPipeline::createPipeline(VulkanContext* context, VulkanRenderPass* re
 
     // Create Pipeline Layout
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+    pipelineLayoutInfo.setLayoutCount = setLayoutCount;
+    pipelineLayoutInfo.pSetLayouts = SetLayouts;
     VKA(vkCreatePipelineLayout(context->device, &pipelineLayoutInfo, nullptr, &pipelineLayout));
 
     // Create Dynamic State

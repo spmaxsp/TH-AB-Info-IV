@@ -1,6 +1,6 @@
 #include "vulkan_base.hpp"
 
-void VulkanCommandBuffer::createCommandBuffer(VulkanContext* context, VulkanSwapchain* swapchain, VulkanRenderPass* renderPass){
+void VulkanCommandBuffer::createCommandBuffer(VulkanContext* context, VulkanSwapchain* swapchain, VulkanRenderPass* renderPass, VkCommandPoolCreateFlags flags){
     LOG_INIT_CERR();
 
     this->context = context;
@@ -10,7 +10,7 @@ void VulkanCommandBuffer::createCommandBuffer(VulkanContext* context, VulkanSwap
     // Create Command Pool
     log(LOG_INFO) << "Creating Command Pool and Buffers" << "\n	";
     VkCommandPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-    poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+    poolInfo.flags = flags;
     poolInfo.queueFamilyIndex = context->graphicsQueue.familyIndex;
     VKA(vkCreateCommandPool(context->device, &poolInfo, nullptr, &commandPool));
 
