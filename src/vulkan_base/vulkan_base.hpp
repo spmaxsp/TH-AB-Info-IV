@@ -110,7 +110,7 @@ class VulkanCommandBuffer {
         VkCommandPool commandPool;
         VkCommandBuffer commandBuffer;
 
-        void createCommandBuffer(VulkanContext* context, VulkanSwapchain* swapchain, VulkanRenderPass* renderPass);
+        void createCommandBuffer(VulkanContext* context, VulkanSwapchain* swapchain, VulkanRenderPass* renderPass, VkCommandPoolCreateFlags flags);
         void destroyCommandBuffer();
 
         void beginCommandBuffer();
@@ -138,7 +138,7 @@ class VulkanPipeline {
         VkPipelineLayout pipelineLayout;
         VkPipeline graphicsPipeline;
 
-        void createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent, VkVertexInputAttributeDescription* attributes, uint32_t numAttributes, VkVertexInputBindingDescription* binding);
+        void createPipeline(VulkanContext* context, VulkanRenderPass* renderPass, const char* vertexShaderFilename, const char* fragmentShaderFilename, VkExtent2D extent, VkVertexInputAttributeDescription* attributes, uint32_t numAttributes, VkVertexInputBindingDescription* binding, VkDescriptorSetLayout* SetLayouts, uint32_t setLayoutCount);
         void destroyPipeline();
 
         VulkanPipeline(){ 
@@ -159,9 +159,10 @@ class VulkanBuffer {
         void* BufferMemory;
 
         void createBuffer(VmaAllocator* allocator, int size, VkBufferUsageFlags usage);
+        void uploadBufferData(VulkanCommandBuffer* commandBuffer, VkFence* fence, VulkanContext* context, void* data, int size);
         void destroyBuffer();
 
-        VulkanBuffer(){ 
+        VulkanBuffer(){
             allocator = VK_NULL_HANDLE; 
             Buffer = VK_NULL_HANDLE; 
             BufferAllocation = VK_NULL_HANDLE; 
@@ -173,16 +174,17 @@ class VulkanImgBuffer {
     private:
         VmaAllocator* allocator;
         VulkanContext* context;
+        void* ImageMemory;
 
+    public:	
         VkImage Image;
         VkImageView ImageView;
         VmaAllocation ImageAllocation;
         VkSampler Sampler;
-        void* ImageMemory;
 
-    public:	
         void createImgBuffer(VmaAllocator* allocator, VulkanContext* context, VkExtent3D extent, VkFormat format, VkImageUsageFlags usage);
         void destroyImgBuffer();
+        void uploadImgBuffer(VulkanCommandBuffer* commandBuffer, VkFence* fence, VulkanContext* context, void* data, int size, VkExtent3D extent);
 
         VulkanImgBuffer(){ 
             allocator = VK_NULL_HANDLE; 
