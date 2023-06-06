@@ -1,4 +1,4 @@
-#include "vulkan_base.hpp"
+#include "vulkan_engine.hpp"
 
 float vertexData[] = {
 	0.5f, -0.5f,		// Position
@@ -23,8 +23,23 @@ uint32_t indexData[] = {
 	3, 0, 2,
 };
 
-void VulkanEngine::InitVulkan(SDL_Window* window){
+void VulkanEngine::InitVulkan(SDL_Window* window, ImguiUI* imguiUI) {
     LOG_INIT_CERR();
+
+    // Check if ImguiUI is valid
+    if (imguiUI == nullptr) {
+        log(LOG_ERROR) << "ImguiUI is nullptr\n";
+        return;
+    }
+
+    // Check if window is valid
+    if (window == nullptr) {
+        log(LOG_ERROR) << "Window is nullptr\n";
+        return;
+    }
+
+    // Save ImguiUI reference
+    this->imguiUI = imguiUI;
 
     // Get Instance Extensions
     uint32_t extensionCount = 0;
@@ -148,7 +163,7 @@ void VulkanEngine::InitVulkan(SDL_Window* window){
     descriptorWrites[0].pImageInfo = &imageInfo;
     VK(vkUpdateDescriptorSets(context.device, ARRAY_SIZE(descriptorWrites), descriptorWrites, 0, nullptr));
 
-    // Init ImGui
+    // Create ImGui Descriptor Set
     VkDescriptorPoolSize imguiPoolSizes[] = {
         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
@@ -170,36 +185,14 @@ void VulkanEngine::InitVulkan(SDL_Window* window){
     imguiDescriptorPoolInfo.pPoolSizes = imguiPoolSizes;
     VKA(vkCreateDescriptorPool(context.device, &imguiDescriptorPoolInfo, nullptr, &imguiDescriptorPool));
 
-    ImGui::CreateContext();
-    ImGui::StyleColorsDark();
-    ImGui_ImplSDL2_InitForVulkan(window);
-    ImGui_ImplVulkan_InitInfo imguiInitInfo = {};
-    imguiInitInfo.Instance = context.instance;
-    imguiInitInfo.PhysicalDevice = context.physicalDevice;
-    imguiInitInfo.Device = context.device;
-    imguiInitInfo.QueueFamily = context.graphicsQueue.familyIndex;
-    imguiInitInfo.Queue = context.graphicsQueue.queue;
-    imguiInitInfo.PipelineCache = VK_NULL_HANDLE;
-    imguiInitInfo.DescriptorPool = imguiDescriptorPool;
-    imguiInitInfo.Allocator = nullptr;
-    imguiInitInfo.MinImageCount = 2;
-    imguiInitInfo.ImageCount = 2;
-    imguiInitInfo.CheckVkResultFn = nullptr;
-    ImGui_ImplVulkan_Init(&imguiInitInfo, renderPass.renderPass);
+    // Init ImGui
+    imguiUI->init(window, &context, &renderPass, &imguiDescriptorPool);
+
+    // Imgui Style
+    imguiUI->loadStyle();
 
     // Upload ImGui Fonts
-    VkCommandBufferBeginInfo beginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    VKA(vkBeginCommandBuffer(copyCommandBuffer.commandBuffer, &beginInfo));
-    ImGui_ImplVulkan_CreateFontsTexture(copyCommandBuffer.commandBuffer);
-    VKA(vkEndCommandBuffer(copyCommandBuffer.commandBuffer));
-    VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &copyCommandBuffer.commandBuffer;
-    VKA(vkQueueSubmit(context.graphicsQueue.queue, 1, &submitInfo, copyFence));
-    VKA(vkWaitForFences(context.device, 1, &copyFence, VK_TRUE, UINT64_MAX));
-    vkResetFences(context.device, 1, &copyFence);
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
+    imguiUI->loadFonts(&context, &copyFence, &copyCommandBuffer);
 
     // Create Pipeline
     VkVertexInputAttributeDescription vertexAttributeDescriptions[3] = {};
@@ -222,7 +215,6 @@ void VulkanEngine::InitVulkan(SDL_Window* window){
     pipeline.createPipeline(&context, &renderPass, "./shaders/texture_vert.spv", "./shaders/texture_frag.spv", swapchain.extent, vertexAttributeDescriptions, 3, &vertexInputBinding, &descriptorSetLayout, 1);
 }
 
-
 void VulkanEngine::ExitVulkan() {
 
     // Wait for device to be idle
@@ -232,9 +224,7 @@ void VulkanEngine::ExitVulkan() {
     pipeline.destroyPipeline();
 
     // Destroy ImGui
-    ImGui_ImplVulkan_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+    imguiUI->destroy();
 
     // Destroy imgui descriptor pool
     vkDestroyDescriptorPool(context.device, imguiDescriptorPool, nullptr);
@@ -279,14 +269,8 @@ void VulkanEngine::ExitVulkan() {
 }
 
 void VulkanEngine::update(gamestate gstate, bool new_webcam, cv::Mat* image){
-    ImGui_ImplVulkan_NewFrame();
-	ImGui_ImplSDL2_NewFrame();
-	ImGui::NewFrame();
-
-    static bool showDemoWindow = false;
-	if(showDemoWindow) {
-		ImGui::ShowDemoWindow(&showDemoWindow);
-	}
+    // Update ImGui
+    imguiUI->newFrame();
 
     // Copy image data to buffer
     webcamBuffer.uploadImgBuffer(&copyCommandBuffer, &copyFence, &context, image->data, image->cols * image->rows * 4, { 640, 480, 1 });
@@ -358,9 +342,7 @@ void VulkanEngine::render() {
         vkCmdDrawIndexed(commandBuffer.commandBuffer, 6, 1, 0, 0, 0);
 
         // Draw ImGui stuff
-        ImGui::Render();
-        ImDrawData* drawData = ImGui::GetDrawData();
-        ImGui_ImplVulkan_RenderDrawData(drawData, commandBuffer.commandBuffer);
+        imguiUI->render(&commandBuffer.commandBuffer);
 
         // End render pass
         vkCmdEndRenderPass(commandBuffer.commandBuffer);

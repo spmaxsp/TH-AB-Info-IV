@@ -34,13 +34,17 @@ set(SOURCE_FILES
     src/vulkan_base/vulkan_cmdbuffer.cpp
     src/vulkan_base/vulkan_pipeline.cpp
     src/vulkan_base/vulkan_utils.cpp
-    src/vulkan_base/vulkan_engine.cpp
+    
+    src/vulkan_engine.cpp
+
+    src/imgui_ui/imgui_ui.cpp               ### imgui
 )
 
 ####################  EXECUTABLE  ####################
 
 ### add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 
 #################### LIBRARIES ####################
 

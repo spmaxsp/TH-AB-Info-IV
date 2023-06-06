@@ -20,8 +20,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "../gamestate.hpp"
-
 #define ASSERT_VULKAN(val) if(val != VK_SUCCESS) {assert(false);}
 #ifndef VK
 #define VK(f) (f)
@@ -210,44 +208,3 @@ class VulkanImgBuffer {
             ImageAllocation = VK_NULL_HANDLE; 
         }
 };
-
-class VulkanEngine {
-    public:
-        VulkanEngine(){  
-        }
-
-        void InitVulkan(SDL_Window* window);
-        void ExitVulkan();
-
-        void update(gamestate gstate, bool new_webcam, cv::Mat* image);
-        
-        void render();
-    private:
-        static const int MAX_FRAMES_IN_FLIGHT = 2;
-        VulkanContext context;
-        VkSurfaceKHR surface;
-        VulkanSwapchain swapchain;
-        VulkanRenderPass renderPass;
-        VulkanPipeline pipeline;
-
-        VkFence copyFence;
-        VulkanCommandBuffer copyCommandBuffer;
-
-        VkFence commandBufferFence;
-        VkSemaphore imageAvailableSemaphore;
-        VkSemaphore renderFinishedSemaphore;
-        std::vector<VulkanCommandBuffer> commandBuffers;
-
-        VmaAllocator allocator;
-        VulkanBuffer vertexBuffer;
-        VulkanBuffer indexBuffer;
-        VulkanImgBuffer webcamBuffer;
-
-        VkDescriptorPool descriptorPool;
-        VkDescriptorSet descriptorSet;
-        VkDescriptorSetLayout descriptorSetLayout;
-
-        VkDescriptorPool imguiDescriptorPool;
-};
-
-

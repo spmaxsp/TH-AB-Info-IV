@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "vulkan_base/vulkan_base.hpp"
+#include "vulkan_engine.hpp"
 
 #include "gamestate.hpp"
 
@@ -62,9 +62,12 @@ int main(int, char**) {
     // Init Game State
     gamestate gstate = {};
 
+    // Init ImGui
+    ImguiUI imgui;
+
     // Initiate Vulkan
     VulkanEngine app;
-    app.InitVulkan(window);
+    app.InitVulkan(window, &imgui);
 
     cv::VideoCapture cap(0);
     cv::Mat webcamImage;
