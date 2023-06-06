@@ -8,6 +8,9 @@
 
 #include "py_extention/PyShellExec.hpp"
 
+//#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
+#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
+
 #ifdef _WIN32
     #include <Windows.h>
 #else
@@ -44,6 +47,9 @@ bool handleEvents() {
 int main(int, char**) {
     // Initiate logger (default name is 'log')
     LOG_INIT_CERR();
+    
+    //log(LOG_INFO) << "Loading module\n";
+    //Shimmersensor module;
 
     // Init SDL and create a window
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {

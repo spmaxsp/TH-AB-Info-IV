@@ -13,7 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
 #################### SOURCE FILES ####################
 
-### set source files
+### set source files 
 set(SOURCE_FILES 
     src/main.cpp                            ### main file
 
@@ -25,8 +25,10 @@ set(SOURCE_FILES
 
     src/py_extention/modules/ModuleTemplate/PyModule.cpp
 
+    src/py_extention/modules/Shimmersensor/Shimmersensor.cpp
+
     src/py_extention/modules/ModuleTemplate/proto/PyModuleProt.pb.cc  ### protobuf
-    #src/py_extention/modules/Shimmersensor/proto/ShimmersensorProt.pb.cc
+    src/py_extention/modules/Shimmersensor/proto/ShimmersensorProt.pb.cc
 
     src/vulkan_base/vulkan_device.cpp       ### vulkan
     src/vulkan_base/vulkan_swapchain.cpp
