@@ -6,7 +6,7 @@
 #include "../../PyShellExec.hpp"
 #include "../../websocket/SocketClient.hpp"
 
-#include "../../../BSlogger.hpp"
+#include <BSlogger.hpp>
 
 #include "proto/ShimmersensorProt.pb.h"
 
