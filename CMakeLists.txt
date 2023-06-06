@@ -34,6 +34,7 @@ set(SOURCE_FILES
     src/vulkan_base/vulkan_cmdbuffer.cpp
     src/vulkan_base/vulkan_pipeline.cpp
     src/vulkan_base/vulkan_utils.cpp
+    src/vulkan_base/vulkan_engine.cpp
 )
 
 ####################  EXECUTABLE  ####################

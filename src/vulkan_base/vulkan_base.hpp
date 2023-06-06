@@ -1,10 +1,26 @@
 #pragma once
 
-#include <BSlogger.hpp>
+#include <SDL.h>
+#include <SDL_vulkan.h>
+
 #include <vulkan/vulkan.h>
-#include <cassert>
-#include <fstream>
+
+#include <opencv2/opencv.hpp>
+
+#include <imgui.h>
+#include <backends/imgui_impl_sdl2.h>
+#include <backends/imgui_impl_vulkan.h>
+
 #include <vk_mem_alloc.h>
+
+#include <BSlogger.hpp>
+
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+#include "../gamestate.hpp"
 
 #define ASSERT_VULKAN(val) if(val != VK_SUCCESS) {assert(false);}
 #ifndef VK
@@ -13,6 +29,10 @@
 #ifndef VKA
 #define VKA(f) ASSERT_VULKAN(VK(f))
 #endif
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+
+#define _DEBUG
 
 struct VulkanQueue {
     VkQueue queue;
@@ -99,7 +119,6 @@ class VulkanRenderPass {
         }
 };
 
-
 class VulkanCommandBuffer {
     private:
         VulkanContext* context;
@@ -126,7 +145,6 @@ class VulkanCommandBuffer {
             commandBuffer = VK_NULL_HANDLE;
         }
 };
-
 
 class VulkanPipeline {
     private:
@@ -191,6 +209,45 @@ class VulkanImgBuffer {
             Image = VK_NULL_HANDLE; 
             ImageAllocation = VK_NULL_HANDLE; 
         }
+};
+
+class VulkanEngine {
+    public:
+        VulkanEngine(){  
+        }
+
+        void InitVulkan(SDL_Window* window);
+        void ExitVulkan();
+
+        void update(gamestate gstate, bool new_webcam, cv::Mat* image);
+        
+        void render();
+    private:
+        static const int MAX_FRAMES_IN_FLIGHT = 2;
+        VulkanContext context;
+        VkSurfaceKHR surface;
+        VulkanSwapchain swapchain;
+        VulkanRenderPass renderPass;
+        VulkanPipeline pipeline;
+
+        VkFence copyFence;
+        VulkanCommandBuffer copyCommandBuffer;
+
+        VkFence commandBufferFence;
+        VkSemaphore imageAvailableSemaphore;
+        VkSemaphore renderFinishedSemaphore;
+        std::vector<VulkanCommandBuffer> commandBuffers;
+
+        VmaAllocator allocator;
+        VulkanBuffer vertexBuffer;
+        VulkanBuffer indexBuffer;
+        VulkanImgBuffer webcamBuffer;
+
+        VkDescriptorPool descriptorPool;
+        VkDescriptorSet descriptorSet;
+        VkDescriptorSetLayout descriptorSetLayout;
+
+        VkDescriptorPool imguiDescriptorPool;
 };
 
 

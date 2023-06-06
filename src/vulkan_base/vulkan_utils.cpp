@@ -1,3 +1,7 @@
+#define VMA_IMPLEMENTATION
+#define VMA_STATIC_VULKAN_FUNCTIONS 1
+#define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
+
 #include "vulkan_base.hpp"
 
 void VulkanBuffer::createBuffer(VmaAllocator* allocator, int size, VkBufferUsageFlags usage) {
