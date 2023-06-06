@@ -123,45 +123,45 @@ void VulkanEngine::InitVulkan(SDL_Window* window, ImguiUI* imguiUI) {
     // Create Image Buffer
     webcamBuffer.createImgBuffer(&allocator, &context, { 640, 480, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-    // Create Descriptor Set
-    VkDescriptorPoolSize poolSizes[] = {
-        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
-    };
-    VkDescriptorPoolCreateInfo descriptorPoolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-    descriptorPoolInfo.maxSets = 1;
-    descriptorPoolInfo.poolSizeCount = ARRAY_SIZE(poolSizes);
-    descriptorPoolInfo.pPoolSizes = poolSizes;
-    VKA(vkCreateDescriptorPool(context.device, &descriptorPoolInfo, nullptr, &descriptorPool));
+    // // Create Descriptor Set
+    // VkDescriptorPoolSize poolSizes[] = {
+    //     { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
+    // };
+    // VkDescriptorPoolCreateInfo descriptorPoolInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+    // descriptorPoolInfo.maxSets = 1;
+    // descriptorPoolInfo.poolSizeCount = ARRAY_SIZE(poolSizes);
+    // descriptorPoolInfo.pPoolSizes = poolSizes;
+    // VKA(vkCreateDescriptorPool(context.device, &descriptorPoolInfo, nullptr, &descriptorPool));
 
-    VkDescriptorSetLayoutBinding layoutBindings[] = {
-        { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr }
-    };
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-    descriptorSetLayoutInfo.bindingCount = ARRAY_SIZE(layoutBindings);
-    descriptorSetLayoutInfo.pBindings = layoutBindings;
-    VKA(vkCreateDescriptorSetLayout(context.device, &descriptorSetLayoutInfo, nullptr, &descriptorSetLayout));
+    // VkDescriptorSetLayoutBinding layoutBindings[] = {
+    //     { 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr }
+    // };
+    // VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+    // descriptorSetLayoutInfo.bindingCount = ARRAY_SIZE(layoutBindings);
+    // descriptorSetLayoutInfo.pBindings = layoutBindings;
+    // VKA(vkCreateDescriptorSetLayout(context.device, &descriptorSetLayoutInfo, nullptr, &descriptorSetLayout));
     
-    VkDescriptorSetAllocateInfo descriptorSetAllocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-    descriptorSetAllocInfo.descriptorPool = descriptorPool;
-    descriptorSetAllocInfo.descriptorSetCount = 1;
-    descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
-    VKA(vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, &descriptorSet));
+    // VkDescriptorSetAllocateInfo descriptorSetAllocInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+    // descriptorSetAllocInfo.descriptorPool = descriptorPool;
+    // descriptorSetAllocInfo.descriptorSetCount = 1;
+    // descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
+    // VKA(vkAllocateDescriptorSets(context.device, &descriptorSetAllocInfo, &descriptorSet));
 
-    // Update Descriptor Set
-    VkDescriptorImageInfo imageInfo = {};
-    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = webcamBuffer.ImageView;
-    imageInfo.sampler = webcamBuffer.Sampler;
+    // // Update Descriptor Set
+    // VkDescriptorImageInfo imageInfo = {};
+    // imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    // imageInfo.imageView = webcamBuffer.ImageView;
+    // imageInfo.sampler = webcamBuffer.Sampler;
 
-    VkWriteDescriptorSet descriptorWrites[1];
-    descriptorWrites[0] = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-    descriptorWrites[0].dstSet = descriptorSet;
-    descriptorWrites[0].dstBinding = 0;
-    descriptorWrites[0].dstArrayElement = 0;
-    descriptorWrites[0].descriptorCount = 1;
-    descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptorWrites[0].pImageInfo = &imageInfo;
-    VK(vkUpdateDescriptorSets(context.device, ARRAY_SIZE(descriptorWrites), descriptorWrites, 0, nullptr));
+    // VkWriteDescriptorSet descriptorWrites[1];
+    // descriptorWrites[0] = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+    // descriptorWrites[0].dstSet = descriptorSet;
+    // descriptorWrites[0].dstBinding = 0;
+    // descriptorWrites[0].dstArrayElement = 0;
+    // descriptorWrites[0].descriptorCount = 1;
+    // descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    // descriptorWrites[0].pImageInfo = &imageInfo;
+    // VK(vkUpdateDescriptorSets(context.device, ARRAY_SIZE(descriptorWrites), descriptorWrites, 0, nullptr));
 
     // Create ImGui Descriptor Set
     VkDescriptorPoolSize imguiPoolSizes[] = {
@@ -191,28 +191,30 @@ void VulkanEngine::InitVulkan(SDL_Window* window, ImguiUI* imguiUI) {
     // Imgui Style
     imguiUI->loadStyle();
 
+    imguiUI->supplyWebcamTexture(&webcamBuffer);
+
     // Upload ImGui Fonts
     imguiUI->loadFonts(&context, &copyFence, &copyCommandBuffer);
 
-    // Create Pipeline
-    VkVertexInputAttributeDescription vertexAttributeDescriptions[3] = {};
-	vertexAttributeDescriptions[0].binding = 0;
-	vertexAttributeDescriptions[0].location = 0;
-	vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-	vertexAttributeDescriptions[0].offset = 0;
-	vertexAttributeDescriptions[1].binding = 0;
-	vertexAttributeDescriptions[1].location = 1;
-	vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-	vertexAttributeDescriptions[1].offset = sizeof(float) * 2;
-    vertexAttributeDescriptions[2].binding = 0;
-	vertexAttributeDescriptions[2].location = 2;
-	vertexAttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-	vertexAttributeDescriptions[2].offset = sizeof(float) * 5;
-	VkVertexInputBindingDescription vertexInputBinding = {};
-	vertexInputBinding.binding = 0;
-	vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	vertexInputBinding.stride = sizeof(float) * 7;
-    pipeline.createPipeline(&context, &renderPass, "./shaders/texture_vert.spv", "./shaders/texture_frag.spv", swapchain.extent, vertexAttributeDescriptions, 3, &vertexInputBinding, &descriptorSetLayout, 1);
+    // // Create Pipeline
+    // VkVertexInputAttributeDescription vertexAttributeDescriptions[3] = {};
+	// vertexAttributeDescriptions[0].binding = 0;
+	// vertexAttributeDescriptions[0].location = 0;
+	// vertexAttributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+	// vertexAttributeDescriptions[0].offset = 0;
+	// vertexAttributeDescriptions[1].binding = 0;
+	// vertexAttributeDescriptions[1].location = 1;
+	// vertexAttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+	// vertexAttributeDescriptions[1].offset = sizeof(float) * 2;
+    // vertexAttributeDescriptions[2].binding = 0;
+	// vertexAttributeDescriptions[2].location = 2;
+	// vertexAttributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+	// vertexAttributeDescriptions[2].offset = sizeof(float) * 5;
+	// VkVertexInputBindingDescription vertexInputBinding = {};
+	// vertexInputBinding.binding = 0;
+	// vertexInputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	// vertexInputBinding.stride = sizeof(float) * 7;
+    // pipeline.createPipeline(&context, &renderPass, "./shaders/texture_vert.spv", "./shaders/texture_frag.spv", swapchain.extent, vertexAttributeDescriptions, 3, &vertexInputBinding, &descriptorSetLayout, 1);
 }
 
 void VulkanEngine::ExitVulkan() {
@@ -221,7 +223,7 @@ void VulkanEngine::ExitVulkan() {
     VKA(vkDeviceWaitIdle(context.device));
 
     // Destroy Pipeline
-    pipeline.destroyPipeline();
+    // pipeline.destroyPipeline();
 
     // Destroy ImGui
     imguiUI->destroy();
@@ -230,7 +232,7 @@ void VulkanEngine::ExitVulkan() {
     vkDestroyDescriptorPool(context.device, imguiDescriptorPool, nullptr);
 
     // Destroy descriptor set
-    vkDestroyDescriptorSetLayout(context.device, descriptorSetLayout, nullptr);
+    // vkDestroyDescriptorSetLayout(context.device, descriptorSetLayout, nullptr);
 
     // Destroy image buffer
     webcamBuffer.destroyImgBuffer();
@@ -330,16 +332,16 @@ void VulkanEngine::render() {
         vkCmdBeginRenderPass(commandBuffer.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // Bind pipeline
-        vkCmdBindPipeline(commandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
+        // vkCmdBindPipeline(commandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.graphicsPipeline);
         
-        // Bind vertex buffer and index buffer and descriptor set
-        VkDeviceSize offset = 0;
-        vkCmdBindVertexBuffers(commandBuffer.commandBuffer, 0, 1, &vertexBuffer.Buffer, &offset);
-        vkCmdBindIndexBuffer(commandBuffer.commandBuffer, indexBuffer.Buffer, 0, VK_INDEX_TYPE_UINT32);
-        vkCmdBindDescriptorSets(commandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        // // Bind vertex buffer and index buffer and descriptor set
+        // VkDeviceSize offset = 0;
+        // vkCmdBindVertexBuffers(commandBuffer.commandBuffer, 0, 1, &vertexBuffer.Buffer, &offset);
+        // vkCmdBindIndexBuffer(commandBuffer.commandBuffer, indexBuffer.Buffer, 0, VK_INDEX_TYPE_UINT32);
+        // vkCmdBindDescriptorSets(commandBuffer.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
-        // Draw Vulkan stuff
-        vkCmdDrawIndexed(commandBuffer.commandBuffer, 6, 1, 0, 0, 0);
+        // // Draw Vulkan stuff
+        // vkCmdDrawIndexed(commandBuffer.commandBuffer, 6, 1, 0, 0, 0);
 
         // Draw ImGui stuff
         imguiUI->render(&commandBuffer.commandBuffer);
