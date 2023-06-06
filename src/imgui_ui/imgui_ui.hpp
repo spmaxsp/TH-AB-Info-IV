@@ -16,8 +16,19 @@ public:
     void loadFonts(VulkanContext* context, VkFence* copyFence, VulkanCommandBuffer* copyCommandBuffer);
     void loadStyle();
 
+    void supplyWebcamTexture(VulkanImgBuffer* webcamBuffer){
+        webcamImageGUI = ImGui_ImplVulkan_AddTexture(webcamBuffer->Sampler, webcamBuffer->ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    }
+
     void newFrame();
     void render(VkCommandBuffer* commandBuffer);
 
     void destroy();
+
+private:
+    void mainGame();
+    void mainMenue();
+    void errorDialog();
+
+    VkDescriptorSet webcamImageGUI;
 };

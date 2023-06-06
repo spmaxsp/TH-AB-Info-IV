@@ -51,9 +51,9 @@ void ImguiUI::loadStyle() {
 	
 	style.Alpha = 1.0f;
 	style.DisabledAlpha = 1.0f;
-	style.WindowPadding = ImVec2(12.0f, 12.0f);
-	style.WindowRounding = 0.0f;
-	style.WindowBorderSize = 0.0f;
+	style.WindowPadding = ImVec2(20.0f, 20.0f);
+	style.WindowRounding = 20.0f;
+	style.WindowBorderSize = 5.0f;
 	style.WindowMinSize = ImVec2(20.0f, 20.0f);
 	style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
 	style.WindowMenuButtonPosition = ImGuiDir_None;
@@ -62,9 +62,9 @@ void ImguiUI::loadStyle() {
 	style.PopupRounding = 0.0f;
 	style.PopupBorderSize = 1.0f;
 	style.FramePadding = ImVec2(6.0f, 6.0f);
-	style.FrameRounding = 0.0f;
-	style.FrameBorderSize = 0.0f;
-	style.ItemSpacing = ImVec2(12.0f, 6.0f);
+	style.FrameRounding = 10.0f;
+	style.FrameBorderSize = 1.0f;
+	style.ItemSpacing = ImVec2(22.0f, 20.0f);
 	style.ItemInnerSpacing = ImVec2(6.0f, 3.0f);
 	style.CellPadding = ImVec2(12.0f, 6.0f);
 	style.IndentSpacing = 20.0f;
@@ -135,15 +135,17 @@ void ImguiUI::loadStyle() {
 	style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.196078434586525f, 0.1764705926179886f, 0.5450980663299561f, 0.501960813999176f);
 
 
-
+    // Standard Fonts
     ImGuiIO& io = ImGui::GetIO();
 
     ImFontAtlas* fontAtlas = io.Fonts;
-    ImFont* font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\micross.ttf"), 20);
+    ImFont* std_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\micross.ttf"), 20);
+    ImFont* fancy_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\OCRAEXT.TTF"), 30);
+    ImFont* big_timer_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\impact.ttf"), 60);
+    ImFont* small_timer_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\impact.ttf"), 30);
+    ImFont* fancy_font_huge = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\OCRAEXT.TTF"), 60);
 
     fontAtlas->Build();
-
-    io.Fonts->TexID = (void*)fontAtlas->TexID;
 }
 
 void ImguiUI::newFrame() {
@@ -153,14 +155,151 @@ void ImguiUI::newFrame() {
 }
 
 void ImguiUI::render(VkCommandBuffer* commandBuffer) {
-    static bool showDemoWindow = true;
+    static bool showDemoWindow = false;
 	if(showDemoWindow) {
 		ImGui::ShowDemoWindow(&showDemoWindow);
 	}
+    
+    mainGame();
+    //mainMenue();
+    errorDialog();
 
     ImGui::Render();
     ImDrawData* drawData = ImGui::GetDrawData();
     ImGui_ImplVulkan_RenderDrawData(drawData, *commandBuffer);
+}
+
+
+void ImguiUI::mainGame() {
+
+    ImGuiIO& io = ImGui::GetIO();
+    // Set window flags
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                   ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
+
+    // Set window size and position
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(io.DisplaySize);
+
+    // Begin the fullscreen ImGui window
+    ImGui::Begin("Fullscreen Window", nullptr, windowFlags);
+
+    // Draw webcam image
+    ImGui::SetCursorPos(ImVec2(0, 0));
+    ImGui::Image(webcamImageGUI, io.DisplaySize);
+
+    // Draw timer
+    ImGui::SetCursorPos(ImVec2(20, 20));
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 1, 1));
+    ImGui::Text("Time:");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    ImGui::SetCursorPos(ImVec2(20, 40));
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
+    ImGui::Text("00:00");
+    ImGui::PopFont();
+
+    // Draw score
+    ImGui::SetCursorPos(ImVec2(20, 90));
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 1, 1));
+    ImGui::Text("Score:");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    ImGui::SetCursorPos(ImVec2(20, 110));
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
+    ImGui::Text("000000");
+    ImGui::PopFont();
+
+    // Draw gameover text
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[4]);
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    ImVec2 text_size = ImGui::CalcTextSize("Game Over");
+    ImGui::SetCursorPos(ImVec2(center.x - text_size.x * 0.5, center.y - text_size.y * 0.5));
+    ImGui::Text("Game Over");
+    ImGui::PopFont();
+
+    // Draw Pause/Resume button
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 120, 20));
+    if (ImGui::Button("Pause", ImVec2(100, 50))) {
+        // Pause/Resume game
+    }
+
+    // End the ImGui window
+    ImGui::End();
+}
+
+void ImguiUI::errorDialog() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Set window size and position
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.3);
+    ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
+    ImGui::Begin("ErrorDialog", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+    // Draw error message
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+    ImGui::Text("Error Message");
+    ImGui::PopFont();
+
+    // Draw OK button
+    if (ImGui::Button("OK", ImVec2(100, 50))) {
+        // Close error dialog
+    }
+
+    // End the ImGui window
+    ImGui::End();
+}
+
+void ImguiUI::mainMenue() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Set window size and position
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.4, io.DisplaySize.y * 0.6);
+    ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
+    ImGui::Begin("MainMenu", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+    // Draw the game title with the fancy font
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 1, 1));
+    ImGui::Text("Game Title");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    // Draw a separator line
+    ImGui::Separator();
+
+    // Draw the menu buttons with big size and spacing
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20, 20));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10, 20));
+
+
+    ImGui::SetCursorPosX(windowSize.x * 0.1);
+    if (ImGui::Button("Start", ImVec2(windowSize.x * 0.8, 0))) {
+    }
+
+    ImGui::SetCursorPosX(windowSize.x * 0.1);
+    if (ImGui::Button("Settings", ImVec2(windowSize.x * 0.8, 0))) {
+    }
+
+    ImGui::SetCursorPosX(windowSize.x * 0.1);
+    if (ImGui::Button("Exit", ImVec2(windowSize.x * 0.8, 0))) {
+    }
+
+    ImGui::PopStyleVar(2);
+
+    // End the window
+    ImGui::End();
 }
 
 void ImguiUI::destroy() {
