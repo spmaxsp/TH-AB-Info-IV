@@ -35,7 +35,6 @@ class EEG:
         self.c.bind(inform_error=self.on_inform_error)
 
 
-
     def StarteSensor(self):
         trained_profile_name = 'ayberk'
         self.c.set_wanted_profile(self.active_profile)
@@ -87,7 +86,6 @@ class EEG:
         else:
             print('The profile ' + self.profile_name + ' is unloaded')
             self.profile_name = ''
-
 
 
 async def handle_client(reader, writer):
