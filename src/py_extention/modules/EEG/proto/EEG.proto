@@ -1,51 +1,30 @@
 syntax = "proto3";
 
-message MentalCommandData {
-  string action = 1;
-  float power = 2;
-  float time = 3;
+package PyModuleProt;
+
+enum Command {
+  COMMAND_NOOP = 0;
+  COMMAND_START_STREAM = 1;
+  COMMAND_STOP_STREAM = 2;
+  COMMAND_LOAD_PROFILE = 3;
+       [.... was sonst noch so für commands gebraucht werden...]
 }
 
-message LiveAdvanceRequest {
-  string profile_name = 1;
-  string headset_id = 2;
+enum State {
+  STATE_IDLE = 0;
+  STATE_STREAMING = 1;
+  STATE_ERROR = 2;
 }
 
-message LoadProfileRequest {
-  string profile_name = 1;
+message DataPacket {
+  State state = 1;
+  string timestamp = 2;
+  string mental_command = 3;
+     [... was das EEG sonst noch so brauchbares an daten hat...]
 }
 
-message UnloadProfileRequest {
-  string profile_name = 1;
-}
-
-message SaveProfileRequest {
-  string profile_name = 1;
-}
-
-message SetSensitivityRequest {
-  string profile_name = 1;
-  repeated float sensitivity = 2;
-}
-
-message LiveAdvanceResponse {
-  repeated MentalCommandData mental_command_data = 1;
-}
-
-message GetActiveActionResponse {
-  repeated string active_actions = 1;
-}
-
-message GetSensitivityResponse {
-  repeated float sensitivity = 1;
-}
-
-service LiveAdvanceService {
-  rpc Start(LiveAdvanceRequest) returns (LiveAdvanceResponse);
-  rpc LoadProfile(LoadProfileRequest) returns (google.protobuf.Empty);
-  rpc UnloadProfile(UnloadProfileRequest) returns (google.protobuf.Empty);
-  rpc SaveProfile(SaveProfileRequest) returns (google.protobuf.Empty);
-  rpc SetSensitivity(SetSensitivityRequest) returns (google.protobuf.Empty);
-  rpc GetActiveAction(google.protobuf.Empty) returns (GetActiveActionResponse);
-  rpc GetSensitivity(google.protobuf.Empty) returns (GetSensitivityResponse);
+message SendCommand {
+  Command command = 1;
+  optional int32 i_value = 2;
+  optional string s_value = 3;
 }
