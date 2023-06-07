@@ -1,7 +1,9 @@
 #pragma once
 
 #include "settings.hpp"
+
 #include "gamestate.hpp"
+#include "displaystate.hpp"
 
 
 

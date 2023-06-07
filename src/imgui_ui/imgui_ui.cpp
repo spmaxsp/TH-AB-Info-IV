@@ -416,7 +416,7 @@ void ImguiUI::settingsMenue() {
         {
             ImGui::Text("EEG");
 
-            ImGui::Text("API UuserID");
+            ImGui::Text("API UserID");
             char UserID[] = "jhgsldfkfhdgksghfdgskjsk";
             ImGui::InputText("", UserID, IM_ARRAYSIZE(UserID));
 
@@ -448,6 +448,10 @@ void ImguiUI::settingsMenue() {
         if (ImGui::BeginTabItem("Moving Head"))
         {
             ImGui::Text("Moving Head");
+
+            ImGui::Text("StepSize");
+            int StepSize = 20;
+            ImGui::SliderInt("", &StepSize, 1, 30);
 
             ImGui::Button("Connect", ImVec2(100, 50));
             ImGui::SameLine();
