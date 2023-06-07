@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package PyModuleProt;
+package EEGProt;
 
 enum Command {
   COMMAND_NOOP = 0;
