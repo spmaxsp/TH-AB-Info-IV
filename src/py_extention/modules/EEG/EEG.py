@@ -3,8 +3,7 @@ import asyncio
 
 from datetime import datetime
 
-from serial import Serial
-import live_advance 
+import cortex from cortex import Cortex
 
 import EEG_pb2 as proto
 
@@ -16,27 +15,79 @@ global streaming
 streaming = False
 
 
+your_app_client_id = 'lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg'
+your_app_client_secret = 'LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3'
+
 class EEG: 
 
+    def __init__(self, app_client_id, app_client_secret, **kwargs):
+        self.c = Cortex(app_client_id, app_client_secret, debug_mode=True, **kwargs)
+        self.c.bind(create_session_done=self.on_create_session_done)
+        self.c.bind(query_profile_done=self.on_query_profile_done)
+        self.c.bind(load_unload_profile_done=self.on_load_unload_profile_done)
+        self.c.bind(save_profile_done=self.on_save_profile_done)
+        self.c.bind(new_com_data=self.on_new_com_data)
+        self.c.bind(get_mc_active_action_done=self.on_get_mc_active_action_done)
+        self.c.bind(mc_action_sensitivity_done=self.on_mc_action_sensitivity_done)
+        self.c.bind(inform_error=self.on_inform_error)
+
+
+
     def StarteSensor(self):
-        your_app_client_id = 'lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg'
-        your_app_client_secret = 'LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3'
-
-    
-        livesensor = LiveAdvance(your_app_client_id, your_app_client_secret)     
-
         trained_profile_name = 'ayberk'
         livesensor.start(trained_profile_name)
 
-if __name__ =='__main__':
+
     def StoppeSensor(self):
         livesensor.c.unsub_request(['com'])
         livesensor.c.close()
 
         print("Reading Mental Command data stopped.")
 
+    def LoadProfile(self, profile_name):
+        self.c.setup_profile(profile_name, 'load')
+
+    def UnloadProfile(self, profile_name):
+        self.c.setup_profile(profile_name, 'unload')
+
+    #callbacks 
+    def on_create_session_done(self, *args, **kwargs):
+        print('session created')
+        self.c.query_profile() 
+
+    
+    def on_query_profile_done(self, *args, **kwargs):
+        print('on_query_profile_done')
+        self.profile_lists = kwargs.get('data') #################################
+        
+
+    def on_new_com_data(self, *args, **kwargs):
+        data = kwargs.get('data')
+        print('mc data: {}'.format(data))
+
+
+    def on_inform_error(self, *args, **kwargs):
+        error_data = kwargs.get('error_data')
+        error_code = error_data['code']
+        error_message = error_data['message']
+
+        print(error_message)
+
+    def on_load_unload_profile_done(self, *args, **kwargs):
+        is_loaded = kwargs.get('isLoaded')
+        print("on_load_unload_profile_done: " + str(is_loaded))
+        
+        if is_loaded == True:
+            # get active action
+            self.get_active_action(self.profile_name)
+        else:
+            print('The profile ' + self.profile_name + ' is unloaded')
+            self.profile_name = ''
+
+    
+
 streaming = False
-sensor = EEG()
+sensor = EEG(your_app_client_id, your_app_client_secret)
 
 async def handle_client(reader, writer):
     global sensor

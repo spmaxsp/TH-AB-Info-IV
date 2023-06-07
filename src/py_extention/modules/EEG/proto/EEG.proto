@@ -7,24 +7,32 @@ enum Command {
   COMMAND_START_STREAM = 1;
   COMMAND_STOP_STREAM = 2;
   COMMAND_LOAD_PROFILE = 3;
-       [.... was sonst noch so für commands gebraucht werden...]
+  COMMAND_GET_PROFILES = 4;
+  COMMAND_GET_STATE = 5;
 }
 
 enum State {
   STATE_IDLE = 0;
   STATE_STREAMING = 1;
   STATE_ERROR = 2;
+  STATE_READY = 3;
+}
+
+enum Type{
+  TYPE_NONE = 0;
+  TYPE_PROFILES = 1;
+  TYPE_DATA = 2;
+  TYPE_STATE_ONLY = 3;
 }
 
 message DataPacket {
   State state = 1;
   string timestamp = 2;
-  string mental_command = 3;
-     [... was das EEG sonst noch so brauchbares an daten hat...]
+  string data = 3;
+  Type type = 4; 
 }
 
 message SendCommand {
   Command command = 1;
-  optional int32 i_value = 2;
-  optional string s_value = 3;
+  optional string data = 2;
 }
