@@ -162,7 +162,11 @@ void ImguiUI::render(VkCommandBuffer* commandBuffer) {
     
     mainGame();
     //mainMenue();
-    errorDialog();
+    //pauseMenue();
+    //errorDialog();
+    //settingsMenue();
+
+    pythonError();
 
     ImGui::Render();
     ImDrawData* drawData = ImGui::GetDrawData();
@@ -176,7 +180,10 @@ void ImguiUI::mainGame() {
     // Set window flags
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                                    ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
+                                   ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground | 
+                                   ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse |
+                                   ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+                                   ImGuiWindowFlags_NoDecoration;
 
     // Set window size and position
     ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -184,6 +191,10 @@ void ImguiUI::mainGame() {
 
     // Begin the fullscreen ImGui window
     ImGui::Begin("Fullscreen Window", nullptr, windowFlags);
+
+    // Disable Scrolling and Padding
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
 
     // Draw webcam image
     ImGui::SetCursorPos(ImVec2(0, 0));
@@ -223,14 +234,53 @@ void ImguiUI::mainGame() {
     ImGui::Text("Game Over");
     ImGui::PopFont();
 
+    // Draw Final Score
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[3]);
+    center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    text_size = ImGui::CalcTextSize("Final Score: 000000");
+    ImGui::SetCursorPos(ImVec2(center.x - text_size.x * 0.5, center.y - text_size.y * 0.5 + 50));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 1, 1));
+    ImGui::Text("Final Score: 000000");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    // Draw Play Again and Mian Menue buttons
+    ImGui::SetCursorPos(ImVec2(center.x - 100, center.y + 80));
+    if (ImGui::Button("Play Again", ImVec2(200, 50))) {
+        // Start new game
+    }
+
+    ImGui::SetCursorPos(ImVec2(center.x - 100, center.y + 150));
+    if (ImGui::Button("Main Menue", ImVec2(200, 50))) {
+        // Start new game
+    }
+
     // Draw Pause/Resume button
     ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 120, 20));
     if (ImGui::Button("Pause", ImVec2(100, 50))) {
         // Pause/Resume game
     }
 
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+    // Draw Crosshair
+    DrawCrosshair(drawList, io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5, 20, ImColor(255, 20, 147));	
+    DrawCrosshair(drawList, io.DisplaySize.x * 0.5 + 100, io.DisplaySize.y * 0.5 + 200, 10, ImColor(100, 50, 200));
+
+
+    // Enable Scrolling and Padding
+    ImGui::PopStyleVar();
+    ImGui::PopStyleVar();
+
     // End the ImGui window
     ImGui::End();
+}
+
+void ImguiUI::DrawCrosshair(ImDrawList* drawList, float x, float y, float size, ImColor color) {
+    drawList->AddLine(ImVec2(x - size, y), ImVec2(x + size, y), color);
+    drawList->AddLine(ImVec2(x, y - size), ImVec2(x, y + size), color);
+
+    drawList->AddCircle(ImVec2(x, y), size, color);
 }
 
 void ImguiUI::errorDialog() {
@@ -238,7 +288,7 @@ void ImguiUI::errorDialog() {
 
     // Set window size and position
     ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
-    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.3);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.8, io.DisplaySize.y * 0.3);
     ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
     ImGui::SetNextWindowPos(windowPos);
     ImGui::SetNextWindowSize(windowSize);
@@ -255,6 +305,205 @@ void ImguiUI::errorDialog() {
     }
 
     // End the ImGui window
+    ImGui::End();
+}
+
+void ImguiUI::pythonError() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Set window size and position
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.8, io.DisplaySize.y * 0.3);
+    ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
+    ImGui::Begin("Python Error", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+    // Draw error message
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+    ImGui::Text("The Game did not exit properly last time. This caused python instances to stay alive. Please close all python instances.");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    // Draw buttons
+    if (ImGui::Button("OK, I closed all python instances")) {
+        // Close error dialog
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("KILL ALL PYTHON INSTANCES")) {
+        // Close error dialog
+    }
+
+    // End the ImGui window
+    ImGui::End();
+}
+
+void ImguiUI::settingsMenue() {
+    ImGui::Begin("Settings");
+
+    if (ImGui::BeginTabBar("SettingsTabBar"))
+    {
+        if (ImGui::BeginTabItem("Global"))
+        {
+            ImGui::Text("Difficulty");
+            const char* difficulty[] = { "Easy", "Medium", "Hard" };
+            static int selectedDifficulty = 0;
+            ImGui::Combo("Difficulty", &selectedDifficulty, difficulty, IM_ARRAYSIZE(difficulty));
+
+            ImGui::Text("Sensor");
+            const char* sensor[] = { "Shimmer", "EEG", "Dummy"};
+            static int selectedSensor = 0;
+            ImGui::Combo("Sensor", &selectedSensor, sensor, IM_ARRAYSIZE(sensor));
+
+            ImGui::Text("Time");
+            const char* time[] = { "30s", "60s", "90s" };
+            static int selectedTime = 0;
+            ImGui::Combo("Time", &selectedTime, time, IM_ARRAYSIZE(time));
+
+            ImGui::Text("Testing");
+            bool virtualMovingHead = false;
+            ImGui::Checkbox("Virtual MovingHead", &virtualMovingHead);
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Python"))
+        {
+            ImGui::Text("Python Path");
+            char pythonPath[] = "C:\\Python\\Python38\\python.exe";
+            ImGui::InputText("PythonPath", pythonPath, IM_ARRAYSIZE(pythonPath));
+
+            ImGui::Text("Test Python Path");
+            ImGui::Button("Test", ImVec2(100, 50));
+
+            ImGui::Text("Python Kill Processes");
+            ImGui::Button("Kill", ImVec2(100, 50));
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Sensor Schimmer"))
+        {
+            ImGui::Text("Shimmer Sensor");
+
+            ImGui::Text("COM Port");
+            char ShimmerCOMPort[] = "COM1";
+            ImGui::InputText("", ShimmerCOMPort, IM_ARRAYSIZE(ShimmerCOMPort));
+
+            ImGui::Text("Polling Rate");
+            int ShimmerPollingRate = 20;
+            ImGui::SliderInt("", &ShimmerPollingRate, 1, 30);
+
+            ImGui::Button("Connect", ImVec2(100, 50));
+            ImGui::SameLine();
+            ImGui::Button("Disconnect", ImVec2(100, 50));
+
+            ImGui::Text("Sensor Status");
+            char ShimmerStatus[] = "Connected";
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+            ImGui::Text(ShimmerStatus, IM_ARRAYSIZE(ShimmerStatus));
+            ImGui::PopStyleColor();
+
+            ImGui::Text("Python Log");
+            char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
+            ImGui::InputTextMultiline("", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Sensor EEG"))
+        {
+            ImGui::Text("EEG");
+
+            ImGui::Text("API UuserID");
+            char UserID[] = "jhgsldfkfhdgksghfdgskjsk";
+            ImGui::InputText("", UserID, IM_ARRAYSIZE(UserID));
+
+            ImGui::Text("API Token");
+            char Token[] = "jhgsldfkfhdgksghfdgskjsksddsdsddsdsdsadghadsgssfdghdgjksafdfg";
+            ImGui::InputText("", Token, IM_ARRAYSIZE(Token));
+
+            ImGui::Text("Polling Rate");
+            int ShimmerPollingRate = 20;
+            ImGui::SliderInt("", &ShimmerPollingRate, 1, 30);
+
+            ImGui::Button("Connect", ImVec2(100, 50));
+            ImGui::SameLine();
+            ImGui::Button("Disconnect", ImVec2(100, 50));
+
+            ImGui::Text("Sensor Status");
+            char ShimmerStatus[] = "Connected";
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+            ImGui::Text(ShimmerStatus, IM_ARRAYSIZE(ShimmerStatus));
+            ImGui::PopStyleColor();
+
+            ImGui::Text("Python Log");
+            char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
+            ImGui::InputTextMultiline("", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Moving Head"))
+        {
+            ImGui::Text("Moving Head");
+
+            ImGui::Button("Connect", ImVec2(100, 50));
+            ImGui::SameLine();
+            ImGui::Button("Disconnect", ImVec2(100, 50));
+
+            ImGui::Text("Sensor Status");
+            char ShimmerStatus[] = "Connected";
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+            ImGui::Text(ShimmerStatus, IM_ARRAYSIZE(ShimmerStatus));
+            ImGui::PopStyleColor();
+
+            ImGui::Text("Python Log");
+            char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
+            ImGui::InputTextMultiline("", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
+    }
+
+    ImGui::Button("Save", ImVec2(100, 50));
+    ImGui::SameLine();
+    ImGui::Button("Cancel", ImVec2(100, 50));
+
+    ImGui::End();
+}
+
+void ImguiUI::pauseMenue() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Set window size and position
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.4, io.DisplaySize.y * 0.3);
+    ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
+    ImGui::Begin("PauseMenu", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+    // Draw the game title with the fancy font
+    ImGui::PushFont(io.Fonts->Fonts[1]);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 0.2f, 1));
+    ImGui::Text("Pause");
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+
+    // Draw the buttons
+    ImGui::SetCursorPosX(windowSize.x * 0.1);
+    if (ImGui::Button("Resume", ImVec2(windowSize.x * 0.8, 0))) {
+        // Resume the game
+    }
+    ImGui::SetCursorPosX(windowSize.x * 0.1);
+    if (ImGui::Button("Main Menu", ImVec2(windowSize.x * 0.8, 0))) {
+        // Go back to the main menu
+    }
+
     ImGui::End();
 }
 

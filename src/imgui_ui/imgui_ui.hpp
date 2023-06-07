@@ -29,6 +29,11 @@ private:
     void mainGame();
     void mainMenue();
     void errorDialog();
+    void pythonError();
+    void pauseMenue();
+    void settingsMenue();
+
+    void DrawCrosshair(ImDrawList* drawList, float x, float y, float size, ImColor color);
 
     VkDescriptorSet webcamImageGUI;
 };
