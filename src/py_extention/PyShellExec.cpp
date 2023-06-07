@@ -4,10 +4,9 @@
 #include <string>
 
 
-PyShellExec::PyShellExec(std::string py_path, std::string py_script, std::vector<std::string> args){
+PyShellExec::PyShellExec(std::string py_path, std::string py_script){
     this->py_path = py_path;
     this->py_script = py_script;
-    this->args = args;
 
     stdout_pipe = nullptr;
     running = false;
@@ -29,7 +28,7 @@ void PyShellExec::generateCommand(std::string &command, std::string py_path, std
     }
 }
 
-bool PyShellExec::run(){
+bool PyShellExec::run(std::vector<std::string> args){
     std::string command;
     generateCommand(command, py_path, py_script, args);
 
