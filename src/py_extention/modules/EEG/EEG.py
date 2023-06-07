@@ -3,7 +3,8 @@ import asyncio
 
 from datetime import datetime
 
-import cortex from cortex import Cortex
+import cortex 
+from cortex import Cortex
 
 import EEG_pb2 as proto
 
@@ -19,29 +20,33 @@ your_app_client_id = 'lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg'
 your_app_client_secret = 'LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3'
 
 class EEG: 
+    mental_command = ""
+    ready_state = False 
+    profile_list = []
+    active_profile = ""
 
     def __init__(self, app_client_id, app_client_secret, **kwargs):
         self.c = Cortex(app_client_id, app_client_secret, debug_mode=True, **kwargs)
         self.c.bind(create_session_done=self.on_create_session_done)
         self.c.bind(query_profile_done=self.on_query_profile_done)
         self.c.bind(load_unload_profile_done=self.on_load_unload_profile_done)
-        self.c.bind(save_profile_done=self.on_save_profile_done)
+        #self.c.bind(save_profile_done=self.on_save_profile_done)
         self.c.bind(new_com_data=self.on_new_com_data)
-        self.c.bind(get_mc_active_action_done=self.on_get_mc_active_action_done)
-        self.c.bind(mc_action_sensitivity_done=self.on_mc_action_sensitivity_done)
+        #self.c.bind(get_mc_active_action_done=self.on_get_mc_active_action_done)
+        #self.c.bind(mc_action_sensitivity_done=self.on_mc_action_sensitivity_done)
         self.c.bind(inform_error=self.on_inform_error)
 
 
 
     def StarteSensor(self):
         trained_profile_name = 'ayberk'
-        livesensor.start(trained_profile_name)
+        self.c.set_wanted_profile(self.active_profile)
+        self.c.open()
+        print("Reading Mental Command data started.")
 
 
     def StoppeSensor(self):
-        livesensor.c.unsub_request(['com'])
-        livesensor.c.close()
-
+        self.c.close()
         print("Reading Mental Command data stopped.")
 
     def LoadProfile(self, profile_name):
@@ -58,8 +63,9 @@ class EEG:
     
     def on_query_profile_done(self, *args, **kwargs):
         print('on_query_profile_done')
-        self.profile_lists = kwargs.get('data') #################################
-        
+        self.profile_list = [kwargs.get('data')]
+        self.ready_state = True 
+
 
     def on_new_com_data(self, *args, **kwargs):
         data = kwargs.get('data')
@@ -93,8 +99,27 @@ async def handle_client(reader, writer):
     global sensor
     addr = writer.get_extra_info('peername')
     print(f"New client connected: {addr}")
+
     
-    async def send_data():
+    def send_data_once():
+        global sensor
+        pb = proto.DataPacket()
+        pb.type = proto.Type.TYPE_STATE_ONLY
+        if sensor.ready_state: 
+            pb.state = proto.State.STATE_READY
+        else:
+            pb.state = proto.State.STATE_WAITING
+            pb.data = ""
+            pb.data = ','.join(sensor.profile_list)
+        now = datetime.now()
+        pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+        try:
+            writer.write(pb.SerializeToString())
+        except ConnectionResetError:
+            print(f"Client {addr} disconnected") 
+
+    
+    async def send_data_loop():
         global streaming
         global sensor 
         while True:
@@ -102,12 +127,9 @@ async def handle_client(reader, writer):
                 #print("Sending data...")
                 pb = proto.DataPacket()
                 pb.state = proto.State.STATE_STREAMING
+                pb.data = sensor.mental_command
                 now = datetime.now()
                 pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                pb.accel_ln_x = sensor.accel_ln_x
-                pb.accel_ln_y = sensor.accel_ln_y 
-                pb.accel_ln_z = sensor.accel_ln_z 
-                #print (sensor.accel_ln_x)
                 try:
                     writer.write(pb.SerializeToString())
                     await writer.drain()
@@ -148,8 +170,16 @@ async def handle_client(reader, writer):
                 sensor.StoppeSensor()
                 streaming = False
 
+            elif pb.command == proto.Command.COMMAND_LOAD_PROFILE:
+                print("Loading profile")
+                sensor.profile_name = pb.data 
+                print(pb.data)
+            elif pb.command == proto.Command.COMMAND_GET_STATE:
+                print("Sending state")
+                send_data_once()
+
     receive_task = asyncio.create_task(receive_data())
-    send_task = asyncio.create_task(send_data())
+    send_task = asyncio.create_task(send_data_loop())
     await asyncio.gather(receive_task, send_task)
 
 async def main():

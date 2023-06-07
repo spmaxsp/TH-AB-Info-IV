@@ -7,22 +7,20 @@ enum Command {
   COMMAND_START_STREAM = 1;
   COMMAND_STOP_STREAM = 2;
   COMMAND_LOAD_PROFILE = 3;
-  COMMAND_GET_PROFILES = 4;
-  COMMAND_GET_STATE = 5;
+  COMMAND_GET_STATE = 4;
 }
 
 enum State {
   STATE_IDLE = 0;
   STATE_STREAMING = 1;
-  STATE_ERROR = 2;
+  STATE_WAITING = 2;
   STATE_READY = 3;
 }
 
 enum Type{
   TYPE_NONE = 0;
-  TYPE_PROFILES = 1;
-  TYPE_DATA = 2;
-  TYPE_STATE_ONLY = 3;
+  TYPE_DATA = 1;
+  TYPE_STATE_ONLY = 2;
 }
 
 message DataPacket {
