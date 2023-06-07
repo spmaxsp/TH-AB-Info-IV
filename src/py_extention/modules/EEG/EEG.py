@@ -6,18 +6,16 @@ from datetime import datetime
 import cortex 
 from cortex import Cortex
 
-import EEG_pb2 as proto
+import EEGProt_pb2 as proto
 
 import os
 import sys
 
-
-global streaming
-streaming = False
-
-
 your_app_client_id = 'lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg'
 your_app_client_secret = 'LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3'
+
+HOST = '172.0.0.1'
+PORT = 65432
 
 class EEG: 
     mental_command = ""
@@ -90,10 +88,7 @@ class EEG:
             print('The profile ' + self.profile_name + ' is unloaded')
             self.profile_name = ''
 
-    
 
-streaming = False
-sensor = EEG(your_app_client_id, your_app_client_secret)
 
 async def handle_client(reader, writer):
     global sensor
@@ -182,10 +177,14 @@ async def handle_client(reader, writer):
     send_task = asyncio.create_task(send_data_loop())
     await asyncio.gather(receive_task, send_task)
 
+
 async def main():
     server = await asyncio.start_server(handle_client, HOST, PORT)
     async with server:
         print("Server running on port " + str(PORT))
         await server.serve_forever()
+
+streaming = False
+sensor = EEG(your_app_client_id, your_app_client_secret)
 
 asyncio.run(main())

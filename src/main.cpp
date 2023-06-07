@@ -10,7 +10,7 @@
 //#include "py_extention/PyRunner.hpp"
 #include "py_extention/PyShellExec.hpp"
 //#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
-#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
+#include "py_extention/modules/EEG/EEG.hpp"
 
 #include <Windows.h>
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     LOG_INIT_CERR();
     
     log(LOG_INFO) << "Loading module\n";
-    Shimmersensor module;
+    EEG module;
 
     log(LOG_INFO) << "Running module\n";
     module.run();
@@ -31,13 +31,23 @@ int main(int argc, char *argv[]) {
 
     Sleep(1000);
 
+    log(LOG_INFO) << "Getting profiles\n";
+    module.getProfiles();
+
+    Sleep(1000);
+
+    log(LOG_INFO) << "Setting profile\n";
+    module.setProfile("default");
+
+    Sleep(1000);
+
     log(LOG_INFO) << "Starting stream\n";
     module.startStream();
 
     Sleep(500);
 
     log(LOG_INFO) << "Reading data\n";
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 5; i++) {
         module.readData();
         Sleep(1000);
     }

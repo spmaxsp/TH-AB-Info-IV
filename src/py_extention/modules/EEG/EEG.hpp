@@ -10,6 +10,9 @@
 
 #include "proto/EEGProt.pb.h"
 
+#define EEG_PORT 50008
+#define EEG_HOST "172.0.0.1"
+
 class EEG {
     private:
         PyShellExec shell_exec;
@@ -18,7 +21,7 @@ class EEG {
         EEG();
         ~EEG();
 
-        void run();
+        void run(int port, std::string host, int polling_rate, std::string userID, std::string token);
         void stop();
         
         void connect();
@@ -26,5 +29,14 @@ class EEG {
         void startStream();
         void stopStream();
 
-        void readData();
+        void pollInitState(std::vector<std::string> &profiles, bool &init_ready);
+        void setProfile(std::string profile);
+
+        void readDataStream();
+
+        std::string getLogs();
+        bool getRunningState();
+        bool getConnectedState();
+        bool getInitState();
+        std::string getLatestDataPacket();
 };
