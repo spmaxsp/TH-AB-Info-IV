@@ -66,49 +66,39 @@ async def movingheadctr():
     channel_special.set_values([0])     #Besondere Einstellungen Aus
     channel_dimmer.set_values([255])    #Dimmer wird auf 100% gestellt also 255
     channel_velocity.set_values([200])  #Geschwindigkeit 200 (255=langsam)
-    channel_pan.set_values([5])         #Anfangspositon horizontal
-    channel_tilt.set_values([15])       #Anfangsposition vertikal
+    channel_pan.set_values([panwert])   #Anfangspositon horizontal
+    channel_tilt.set_values([tiltwert]) #Anfangsposition vertikal
     channel_color.set_values([50])      #Farbe Rot
-    await asyncio.sleep(2)              #5
+    await asyncio.sleep(2)
 
     while True:
         #Ausrichtung des Moving-Head entsprchend des Eingangswert:
         if rechts:
             print("rechts")
-            if panwert < parameter:
-                panwert = 170 - parameter + panwert
+            if panwert - parameter < 40:#rechtes Ende erreicht
+                panwert = 40
                 channel_pan.set_values([panwert])
+
             else:
-                channel_pan.set_values([panwert - parameter])  #Weiterdrehen
+                channel_pan.set_values([panwert - parameter])
                 panwert = panwert - parameter
             await asyncio.sleep(0.1)
             rechts = False
 
+
         if oben:
             print("oben")
             if tiltwert + parameter > 127:#da Senkrechte ansonsten überschritten wird (sonst dreht sich oben unten)
-                if panwert > 170: #Verhinderung Wertebereichsüberschreitung
-                    panwert = panwert - 85 #Drehung um 180° zurück
-                    channel_pan.set_values([panwert])
-                    await asyncio.sleep(0.1)
-                    tiltwert = 127  #127 - parameter + 127 - tiltwert
-                    channel_tilt.set_values([tiltwert])
-                    await asyncio.sleep(0.1)
-                    oben = False
-                else:
-                    panwert = panwert + 85  #Drehung um 180° vor
-                    channel_pan.set_values([panwert])
-                    await asyncio.sleep(0.1)
-                    tiltwert = 127  #127 - parameter + 127 - tiltwert
-                    channel_tilt.set_values([tiltwert])
-                    await asyncio.sleep(0.1)
-                    oben = False
-            else:#Weiterkippen verhindern wenn Senkrechte überschritten
+                tiltwert = 127#Moving Head stoppt in der max. Tilt-Position
+                channel_tilt.set_values([tiltwert])
+                await asyncio.sleep(0.1)
+                oben = False
+
+            else:
                 channel_tilt.set_values([tiltwert + parameter])
                 await asyncio.sleep(0.1)
                 tiltwert = tiltwert + parameter
                 oben = False
-
 
 
         if unten:
@@ -128,8 +118,8 @@ async def movingheadctr():
 
         if links:
             print("links")
-            if panwert + parameter > 255:
-                panwert = panwert - 170 + parameter
+            if panwert + parameter > 130:#linkes Ende erreicht
+                panwert = 130
                 channel_pan.set_values([panwert])
                 await asyncio.sleep(0.1)
                 links = False
