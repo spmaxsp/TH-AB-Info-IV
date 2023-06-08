@@ -2,16 +2,56 @@
 #include <string>
 #include <json.hpp>
 
+#define DIFFICULTY_EASY 0
+#define DIFFICULTY_MEDIUM 1
+#define DIFFICULTY_HARD 2
+
+#define SENSOR_SHIMMER 0
+#define SENSOR_EEG 1
+#define SENSOR_VIRTUAL 2
+
 using json = nlohmann::json;
+
+struct ShimmerSettings {
+    std::string com;
+    int pollrate;
+};
+
+struct EegSettings {
+    std::string user_id;
+    std::string token;
+    int pollrate;
+};
+
+struct HeadSettings {
+    float step_size;
+};
+
+struct MainSettings {
+    int difficulty;
+    int sensor;
+    int time;
+    bool virtual_head;
+};
+
+struct PythonSettings {
+    std::string path;
+    bool clean_exit_flag;
+};
+
+struct ScoreSettings {
+    int high_score;
+};
 
 class SettingsManager {
 public:
     std::string fileName;
-    int highscore = 0;
-    std::string pythonPath = "";
-    int difficulty = 0;
-    std::string mode = "";
-    bool cleanExitFlag = false;
+    ShimmerSettings shimmer;
+    EegSettings eeg;
+    HeadSettings head;
+    MainSettings main;
+    PythonSettings python;
+    ScoreSettings score;
 
     SettingsManager(const std::string& fileName) : fileName(fileName) {}
 
@@ -22,54 +62,65 @@ public:
             return false;
         }
 
-        json jsonData;
-        file >> jsonData;
-
-        highscore = jsonData["Highscore"];
-        pythonPath = jsonData["PythonPath"];
-        difficulty = jsonData["Difficulty"];
-        mode = jsonData["Mode"];
-        cleanExitFlag = jsonData["CleanExitFlag"];
-
+        file >> settingsData;
         file.close();
+
+        try {
+            shimmer = settingsData.at("shimmer").get<ShimmerSettings>();
+            eeg = settingsData.at("eeg").get<EegSettings>();
+            head = settingsData.at("head").get<HeadSettings>();
+            main = settingsData.at("main").get<MainSettings>();
+            python = settingsData.at("python").get<PythonSettings>();
+            score = settingsData.at("score").get<ScoreSettings>();
+        } catch (const json::exception&) {
+            // Error occurred while parsing the settings, handle it accordingly
+            return false;
+        }
+
         return true;
     }
 
     bool saveSettings() {
-        json jsonData;
-        jsonData["Highscore"] = highscore;
-        jsonData["PythonPath"] = pythonPath;
-        jsonData["Difficulty"] = difficulty;
-        jsonData["Mode"] = mode;
-        jsonData["CleanExitFlag"] = cleanExitFlag;
+        settingsData["shimmer"] = shimmer;
+        settingsData["eeg"] = eeg;
+        settingsData["head"] = head;
+        settingsData["main"] = main;
+        settingsData["python"] = python;
+        settingsData["score"] = score;
 
         std::ofstream file(fileName);
         if (!file.is_open()) {
             return false;
         }
 
-        file << jsonData;
-
+        file << settingsData;
         file.close();
         return true;
     }
 
 private:
+    json settingsData;
+
     void createDefaultSettingsFile() {
-        json jsonData;
-        jsonData["Highscore"] = highscore;
-        jsonData["PythonPath"] = pythonPath;
-        jsonData["Difficulty"] = difficulty;
-        jsonData["Mode"] = mode;
-        jsonData["CleanExitFlag"] = cleanExitFlag;
+        shimmer.com = "COM1";
+        shimmer.pollrate = 100;
 
-        std::ofstream file(fileName);
-        if (!file.is_open()) {
-            return;
-        }
+        eeg.user_id = "";
+        eeg.token = "";
+        eeg.pollrate = 500;
 
-        file << jsonData;
+        head.step_size = 0.1;
 
-        file.close();
+        main.difficulty = "easy";
+        main.sensor = "accelerometer";
+        main.time = 60;
+        main.virtual_head = false;
+
+        python.path = "/usr/bin/python3";
+        python.clean_exit_flag = true;
+
+        score.high_score = 0;
+
+        saveSettings();
     }
 };

@@ -89,7 +89,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE libs/vma)
 target_include_directories(${PROJECT_NAME} PRIVATE libs/bslogger)
 
 ### JSON (header only)
-target_include_directories(${PROJECT_NAME} PRIVATE libs/json)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/json/single_include/nlohmann)
 
 #################### COMPILE OPTIONS ####################
 
