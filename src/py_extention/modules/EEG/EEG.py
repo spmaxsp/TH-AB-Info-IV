@@ -11,11 +11,17 @@ import EEGProt_pb2 as proto
 import os
 import sys
 
-your_app_client_id = 'lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg'
-your_app_client_secret = 'LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3'
+#your_app_client_id = 'lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg'
+#your_app_client_secret = 'LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3'
 
-HOST = '172.0.0.1'
-PORT = 65432
+#HOST = '172.0.0.1'
+#PORT = 65432
+
+your_app_client_id = sys.argv(3)
+your_app_client_secret = sys.argv(4)
+
+HOST = sys.argv(1)
+PORT = sys.argv(0)
 
 class EEG: 
     mental_command = ""

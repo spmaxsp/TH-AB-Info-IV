@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     EEG module;
 
     log(LOG_INFO) << "Running module\n";
-    module.run();
+    module.run(20, "lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg", "LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3");
 
     Sleep(500);
 
@@ -32,7 +32,12 @@ int main(int argc, char *argv[]) {
     Sleep(1000);
 
     log(LOG_INFO) << "Getting profiles\n";
-    module.getProfiles();
+    std::vector<std::string> profiles = module.getProfiles();
+
+    log(LOG_INFO) << "Profiles:\n";
+    for (auto profile : profiles) {
+        log(LOG_INFO) << profile << "\n";
+    }
 
     Sleep(1000);
 
@@ -48,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     log(LOG_INFO) << "Reading data\n";
     for (int i = 0; i < 5; i++) {
-        module.readData();
+        module.getLatestDataPacket();
         Sleep(1000);
     }
 

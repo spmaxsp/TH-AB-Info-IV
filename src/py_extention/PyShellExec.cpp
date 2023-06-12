@@ -118,9 +118,9 @@ bool PyShellExec::stop(){
 #endif
 }
 
-//std::string PyShellExec::getOutput(){
-//    return output;
-//}
+std::string PyShellExec::getOutput(){
+    return output;
+}
 
 bool PyShellExec::isRunning(){
     return running;

@@ -8,7 +8,15 @@ EEG::~EEG() {
 }
 
 void EEG::run(int polling_rate, std::string userID, std::string token) {
-    shell_exec.run({std::to_string(EEG_PORT), EEG_HOST, std::to_string(polling_rate), userID, token});
+    std::vector<std::string> args;
+
+    args.push_back(std::to_string(EEG_PORT));
+    args.push_back(EEG_HOST);
+    args.push_back(std::to_string(polling_rate));
+    args.push_back(userID);
+    args.push_back(token);
+
+    shell_exec.run(args);
 }
 
 void EEG::stop() {
@@ -138,4 +146,8 @@ bool EEG::getStreamingState() {
 
 std::string EEG::getLatestDataPacket() {
     return latest_data_packet;
+}
+
+std::vector<std::string> EEG::getProfiles() {
+    return profiles;
 }

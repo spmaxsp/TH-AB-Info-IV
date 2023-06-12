@@ -51,4 +51,5 @@ class EEG {
         bool getInitState();
         bool getStreamingState();
         std::string getLatestDataPacket();
+        std::vector<std::string> getProfiles();
 };
