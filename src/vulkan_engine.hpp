@@ -13,7 +13,7 @@ class VulkanEngine {
         void InitVulkan(SDL_Window* window, ImguiUI* imguiUI);
         void ExitVulkan();
 
-        void update(gamestate gstate, bool new_webcam, cv::Mat* image);
+        void update(cv::Mat* image);
         
         void render();
     private:

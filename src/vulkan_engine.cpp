@@ -1,28 +1,5 @@
 #include "vulkan_engine.hpp"
 
-float vertexData[] = {
-	0.5f, -0.5f,		// Position
-	1.0f, 0.0f, 0.0f,	// Color
-	1.0f, 0.0f,			// Texcoord
-
-	0.5f, 0.5f,
-	0.0f, 1.0f, 0.0f,
-	1.0f, 1.0f,
-
-	-0.5f, 0.5f,
-	0.0f, 0.0f, 1.0f,
-	0.0f, 1.0f,
-
-	-0.5f, -0.5f,
-	0.0f, 1.0f, 0.0f,
-	0.0f, 0.0f,
-};
-
-uint32_t indexData[] = {
-	0, 1, 2,
-	3, 0, 2,
-};
-
 void VulkanEngine::InitVulkan(SDL_Window* window, ImguiUI* imguiUI) {
     LOG_INIT_CERR();
 
@@ -109,16 +86,16 @@ void VulkanEngine::InitVulkan(SDL_Window* window, ImguiUI* imguiUI) {
     vmaCreateAllocator(&allocatorInfo, &allocator);
 
     // Create Vertex Buffer
-    vertexBuffer.createBuffer(&allocator, sizeof(vertexData), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+    //vertexBuffer.createBuffer(&allocator, sizeof(vertexData), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
     // Create Index Buffer
-    indexBuffer.createBuffer(&allocator, sizeof(indexData), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+    //indexBuffer.createBuffer(&allocator, sizeof(indexData), VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
     // Copy Vertex Data
-    vertexBuffer.uploadBufferData(&copyCommandBuffer, &copyFence, &context, vertexData, sizeof(vertexData));
+    //vertexBuffer.uploadBufferData(&copyCommandBuffer, &copyFence, &context, vertexData, sizeof(vertexData));
 
     // Copy Index Data
-    indexBuffer.uploadBufferData(&copyCommandBuffer, &copyFence, &context, indexData, sizeof(indexData));
+    //indexBuffer.uploadBufferData(&copyCommandBuffer, &copyFence, &context, indexData, sizeof(indexData));
 
     // Create Image Buffer
     webcamBuffer.createImgBuffer(&allocator, &context, { 640, 480, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
@@ -238,10 +215,10 @@ void VulkanEngine::ExitVulkan() {
     webcamBuffer.destroyImgBuffer();
 
     // Destroy vertex buffer
-    vertexBuffer.destroyBuffer();
+    //vertexBuffer.destroyBuffer();
 
     // Destroy index buffer
-    indexBuffer.destroyBuffer();
+    //indexBuffer.destroyBuffer();
 
     // Destroy allocator
     vmaDestroyAllocator(allocator);
@@ -270,7 +247,7 @@ void VulkanEngine::ExitVulkan() {
     context.destroyVulkanContext();
 }
 
-void VulkanEngine::update(gamestate gstate, bool new_webcam, cv::Mat* image){
+void VulkanEngine::update(cv::Mat* image){
     // Update ImGui
     imguiUI->newFrame();
 
