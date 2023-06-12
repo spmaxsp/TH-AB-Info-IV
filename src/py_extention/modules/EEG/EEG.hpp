@@ -11,7 +11,7 @@
 #include "proto/EEGProt.pb.h"
 
 #define EEG_PORT 50008
-#define EEG_HOST "172.0.0.1"
+#define EEG_HOST "127.0.0.1"
 
 
 class EEG {

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     EEG module;
 
     log(LOG_INFO) << "Running module\n";
-    module.run(20, "lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg", "LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3");
+    module.run(10, "lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg", "LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3");
 
     Sleep(500);
 
@@ -30,6 +30,11 @@ int main(int argc, char *argv[]) {
     module.connect();
 
     Sleep(1000);
+
+    while(!module.getInitState()){
+      module.pollInitState();
+      Sleep(2000);
+    }
 
     log(LOG_INFO) << "Getting profiles\n";
     std::vector<std::string> profiles = module.getProfiles();
@@ -39,10 +44,10 @@ int main(int argc, char *argv[]) {
         log(LOG_INFO) << profile << "\n";
     }
 
-    Sleep(1000);
+    Sleep(2000);
 
     log(LOG_INFO) << "Setting profile\n";
-    module.setProfile("default");
+    module.setProfile("ayberk");
 
     Sleep(1000);
 

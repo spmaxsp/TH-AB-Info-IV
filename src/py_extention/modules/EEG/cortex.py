@@ -105,11 +105,10 @@ class Cortex(Dispatcher):
         
         # As default, a Emotiv self-signed certificate is required.
         # If you don't want to use the certificate, please replace by the below line  by sslopt={"cert_reqs": ssl.CERT_NONE}
-        sslopt = {'ca_certs': "../certificates/rootCA.pem", "cert_reqs": ssl.CERT_REQUIRED}
+        sslopt = {'ca_certs': "./scripts/certificates/rootCA.pem", "cert_reqs": ssl.CERT_REQUIRED}
 
         self.websock_thread  = threading.Thread(target=self.ws.run_forever, args=(None, sslopt), name=threadName)
-        self.websock_thread .start()
-        self.websock_thread.join()
+        self.websock_thread.start()
 
     def close(self):
         self.ws.close()
