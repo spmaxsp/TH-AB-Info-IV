@@ -40,6 +40,10 @@ set(SOURCE_FILES
     src/vulkan_engine.cpp
 
     src/imgui_ui/imgui_ui.cpp               ### imgui
+
+    src/gamelogic.cpp                       ### game logic
+
+    src/cv2_cam/webcam.cpp                  ### opencv
 )
 
 ####################  EXECUTABLE  ####################

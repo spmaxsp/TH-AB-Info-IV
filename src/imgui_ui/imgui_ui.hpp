@@ -10,6 +10,8 @@
 
 #include "../vulkan_base/vulkan_base.hpp"
 
+#include "../gamelogic.hpp"
+
 class ImguiUI {
 public:
     void init(SDL_Window* window, VulkanContext* context, VulkanRenderPass* renderPass, VkDescriptorPool* imguiDescriptorPool);
@@ -25,6 +27,9 @@ public:
 
     void destroy();
 
+    ImguiUI(GameLogic* gameLogic) : gameLogic(gameLogic) {
+    }
+
 private:
     void mainGame();
     void mainMenue();
@@ -36,4 +41,6 @@ private:
     void DrawCrosshair(ImDrawList* drawList, float x, float y, float size, ImColor color);
 
     VkDescriptorSet webcamImageGUI;
+
+    GameLogic* gameLogic;
 };
