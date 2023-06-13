@@ -161,18 +161,48 @@ void ImguiUI::render(VkCommandBuffer* commandBuffer) {
 	}
     
     mainGame();
-    //mainMenue();
-    //pauseMenue();
-    //errorDialog();
-    //settingsMenue();
 
-    pythonError();
+    if(gameLogic->dstate.show_main_menue){
+        mainMenue();
+    }
+    else if(gameLogic->dstate.show_settings){
+        settingsMenue();
+    }
+    else if(gameLogic->dstate.show_pause){
+        pauseMenue();
+    }
+    else if(gameLogic->dstate.show_generic_err){
+        errorDialog();
+    }
+    else if(gameLogic->dstate.show_py_err){
+        pythonError();
+    }
 
     ImGui::Render();
     ImDrawData* drawData = ImGui::GetDrawData();
     ImGui_ImplVulkan_RenderDrawData(drawData, *commandBuffer);
 }
 
+void displayTime(int seconds) {
+    int minutes = seconds / 60;
+    seconds %= 60;
+
+    char timeString[6];
+    std::sprintf(timeString, "%02d:%02d", minutes, seconds);
+
+    ImGui::Text("%s", timeString);
+}
+
+void displayScore(int score) {
+    const int maxScoreLength = 6;
+    char scoreString[maxScoreLength + 1];
+    std::memset(scoreString, '0', maxScoreLength);
+    scoreString[maxScoreLength] = '\0';
+
+    std::sprintf(scoreString, "%0*d", maxScoreLength - 7, score);
+
+    ImGui::Text("%s", scoreString);
+}
 
 void ImguiUI::mainGame() {
 
@@ -210,7 +240,7 @@ void ImguiUI::mainGame() {
 
     ImGui::SetCursorPos(ImVec2(20, 40));
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
-    ImGui::Text("00:00");
+    displayTime(gameLogic->gstate.CurrentTime);
     ImGui::PopFont();
 
     // Draw score
@@ -223,50 +253,79 @@ void ImguiUI::mainGame() {
 
     ImGui::SetCursorPos(ImVec2(20, 110));
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]);
-    ImGui::Text("000000");
+    displayScore(gameLogic->gstate.CurrentScore);
     ImGui::PopFont();
-
-    // Draw gameover text
-    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[4]);
-    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
-    ImVec2 text_size = ImGui::CalcTextSize("Game Over");
-    ImGui::SetCursorPos(ImVec2(center.x - text_size.x * 0.5, center.y - text_size.y * 0.5));
-    ImGui::Text("Game Over");
-    ImGui::PopFont();
-
-    // Draw Final Score
-    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[3]);
-    center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
-    text_size = ImGui::CalcTextSize("Final Score: 000000");
-    ImGui::SetCursorPos(ImVec2(center.x - text_size.x * 0.5, center.y - text_size.y * 0.5 + 50));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 1, 1));
-    ImGui::Text("Final Score: 000000");
-    ImGui::PopStyleColor();
-    ImGui::PopFont();
-
-    // Draw Play Again and Mian Menue buttons
-    ImGui::SetCursorPos(ImVec2(center.x - 100, center.y + 80));
-    if (ImGui::Button("Play Again", ImVec2(200, 50))) {
-        // Start new game
-    }
-
-    ImGui::SetCursorPos(ImVec2(center.x - 100, center.y + 150));
-    if (ImGui::Button("Main Menue", ImVec2(200, 50))) {
-        // Start new game
-    }
 
     // Draw Pause/Resume button
-    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 120, 20));
-    if (ImGui::Button("Pause", ImVec2(100, 50))) {
-        // Pause/Resume game
+    if (gameLogic->gstate.GameRunning){
+        ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 120, 20));
+        if (ImGui::Button("Pause", ImVec2(100, 50))) {
+            gameLogic->gstate.GameRunning = false;
+            gameLogic->dstate.show_pause = true;
+        }
     }
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
     // Draw Crosshair
-    DrawCrosshair(drawList, io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5, 20, ImColor(255, 20, 147));	
-    DrawCrosshair(drawList, io.DisplaySize.x * 0.5 + 100, io.DisplaySize.y * 0.5 + 200, 10, ImColor(100, 50, 200));
+    DrawCrosshair(drawList, io.DisplaySize.x * gameLogic->gstate.TargetPosX/1000, io.DisplaySize.y * gameLogic->gstate.TargetPosY/1000, 20, ImColor(255, 20, 147));	
 
+    // Draw Virtual Crosshair
+    if (gameLogic->settingsManager.main.virtual_head){
+        DrawCrosshair(drawList, io.DisplaySize.x * gameLogic->gstate.CurrentPosX/1000, io.DisplaySize.y * gameLogic->gstate.CurrentPosY/1000, 10, ImColor(100, 50, 200));
+    }
+
+    // Draw D-Pad
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 150, io.DisplaySize.y - 200));
+    if (ImGui::Button("Up", ImVec2(50, 50))) {
+        gameLogic->gstate.CurrentPosY += 50;
+    }
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 200, io.DisplaySize.y - 150));
+    if (ImGui::Button("Left", ImVec2(50, 50))) {
+        gameLogic->gstate.CurrentPosX -= 50;
+    }
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 100, io.DisplaySize.y - 150));
+    if (ImGui::Button("Right", ImVec2(50, 50))) {
+        gameLogic->gstate.CurrentPosX += 50;
+    }
+    ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 150, io.DisplaySize.y-100));
+    if (ImGui::Button("Down", ImVec2(50, 50))) {
+        gameLogic->gstate.CurrentPosY -= 50;
+    }
+
+    // Draw Game Over Screen
+    if(gameLogic->dstate.show_gameover){
+        // Draw gameover text
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[4]);
+        ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+        ImVec2 text_size = ImGui::CalcTextSize("Game Over");
+        ImGui::SetCursorPos(ImVec2(center.x - text_size.x * 0.5, center.y - text_size.y * 0.5));
+        ImGui::Text("Game Over");
+        ImGui::PopFont();
+
+        // Draw Final Score
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[3]);
+        center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+        text_size = ImGui::CalcTextSize("000000");
+        ImGui::SetCursorPos(ImVec2(center.x - text_size.x * 0.5, center.y - text_size.y * 0.5 + 50));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.2f, 1, 1));
+        ImGui::Text("%06d", gameLogic->gstate.CurrentScore);
+        ImGui::PopStyleColor();
+        ImGui::PopFont();
+
+        // Draw Play Again and Main Menue buttons
+        ImGui::SetCursorPos(ImVec2(center.x - 100, center.y + 80));
+        if (ImGui::Button("Play Again", ImVec2(200, 50))) {
+            gameLogic->dstate.show_gameover = false;
+            gameLogic->startGame();
+        }
+
+        ImGui::SetCursorPos(ImVec2(center.x - 100, center.y + 150));
+        if (ImGui::Button("Main Menue", ImVec2(200, 50))) {
+            gameLogic->dstate.show_gameover = false;
+            gameLogic->dstate.show_main_menue = true;
+        }
+    }
 
     // Enable Scrolling and Padding
     ImGui::PopStyleVar();
@@ -296,12 +355,12 @@ void ImguiUI::errorDialog() {
 
     // Draw error message
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-    ImGui::Text("Error Message");
+    ImGui::Text("Error: %s", gameLogic->dstate.error_msg.c_str());
     ImGui::PopFont();
 
     // Draw OK button
     if (ImGui::Button("OK", ImVec2(100, 50))) {
-        // Close error dialog
+        gameLogic->dstate.show_generic_err = false;
     }
 
     // End the ImGui window
@@ -340,30 +399,35 @@ void ImguiUI::pythonError() {
 }
 
 void ImguiUI::settingsMenue() {
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Set window size and position
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.8, io.DisplaySize.y * 0.9);
+    ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
     ImGui::Begin("Settings");
 
+    ImGui::BeginChild("ScrollableContainer", ImVec2(0, io.DisplaySize.y * 0.8), true);
     if (ImGui::BeginTabBar("SettingsTabBar"))
     {
         if (ImGui::BeginTabItem("Global"))
         {
             ImGui::Text("Difficulty");
             const char* difficulty[] = { "Easy", "Medium", "Hard" };
-            static int selectedDifficulty = 0;
-            ImGui::Combo("Difficulty", &selectedDifficulty, difficulty, IM_ARRAYSIZE(difficulty));
+            ImGui::Combo("Difficulty", &gameLogic->settingsManager.main.difficulty, difficulty, IM_ARRAYSIZE(difficulty));
 
             ImGui::Text("Sensor");
             const char* sensor[] = { "Shimmer", "EEG", "Dummy"};
-            static int selectedSensor = 0;
-            ImGui::Combo("Sensor", &selectedSensor, sensor, IM_ARRAYSIZE(sensor));
+            ImGui::Combo("Sensor", &gameLogic->settingsManager.main.sensor, sensor, IM_ARRAYSIZE(sensor));
 
             ImGui::Text("Time");
             const char* time[] = { "30s", "60s", "90s" };
-            static int selectedTime = 0;
-            ImGui::Combo("Time", &selectedTime, time, IM_ARRAYSIZE(time));
+            ImGui::Combo("Time", &gameLogic->settingsManager.main.time, time, IM_ARRAYSIZE(time));
 
             ImGui::Text("Testing");
-            bool virtualMovingHead = false;
-            ImGui::Checkbox("Virtual MovingHead", &virtualMovingHead);
+            ImGui::Checkbox("Virtual MovingHead", &gameLogic->settingsManager.main.virtual_head);
 
             ImGui::EndTabItem();
         }
@@ -371,14 +435,17 @@ void ImguiUI::settingsMenue() {
         if (ImGui::BeginTabItem("Python"))
         {
             ImGui::Text("Python Path");
-            char pythonPath[] = "C:\\Python\\Python38\\python.exe";
-            ImGui::InputText("PythonPath", pythonPath, IM_ARRAYSIZE(pythonPath));
+            ImGui::InputText("PythonPath", gameLogic->settingsManager.python.path, IM_ARRAYSIZE(gameLogic->settingsManager.python.path));
 
             ImGui::Text("Test Python Path");
-            ImGui::Button("Test", ImVec2(100, 50));
+            if (ImGui::Button("Test", ImVec2(100, 50))){
+                gameLogic->testPythonPath();
+            }
 
             ImGui::Text("Python Kill Processes");
-            ImGui::Button("Kill", ImVec2(100, 50));
+            if (ImGui::Button("Kill", ImVec2(100, 50))){
+                gameLogic->killPythonProcesses();
+            }
 
             ImGui::EndTabItem();
         }
@@ -388,12 +455,10 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("Shimmer Sensor");
 
             ImGui::Text("COM Port");
-            char ShimmerCOMPort[] = "COM1";
-            ImGui::InputText("", ShimmerCOMPort, IM_ARRAYSIZE(ShimmerCOMPort));
+            ImGui::InputText("COM Port", gameLogic->settingsManager.shimmer.com, IM_ARRAYSIZE(gameLogic->settingsManager.shimmer.com));
 
             ImGui::Text("Polling Rate");
-            int ShimmerPollingRate = 20;
-            ImGui::SliderInt("", &ShimmerPollingRate, 1, 30);
+            ImGui::SliderInt("Shimmer Polling Rate", &gameLogic->settingsManager.shimmer.pollrate, 1, 30, "%d Hz");
 
             ImGui::Button("Connect", ImVec2(100, 50));
             ImGui::SameLine();
@@ -407,7 +472,7 @@ void ImguiUI::settingsMenue() {
 
             ImGui::Text("Python Log");
             char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
-            ImGui::InputTextMultiline("", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+            ImGui::InputTextMultiline("Shimmer Python log", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
             ImGui::EndTabItem();
         }
@@ -417,16 +482,13 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("EEG");
 
             ImGui::Text("API UserID");
-            char UserID[] = "jhgsldfkfhdgksghfdgskjsk";
-            ImGui::InputText("", UserID, IM_ARRAYSIZE(UserID));
+            ImGui::InputText("API UserID", gameLogic->settingsManager.eeg.user_id, IM_ARRAYSIZE(gameLogic->settingsManager.eeg.user_id));
 
             ImGui::Text("API Token");
-            char Token[] = "jhgsldfkfhdgksghfdgskjsksddsdsddsdsdsadghadsgssfdghdgjksafdfg";
-            ImGui::InputText("", Token, IM_ARRAYSIZE(Token));
+            ImGui::InputText("API Token", gameLogic->settingsManager.eeg.token, IM_ARRAYSIZE(gameLogic->settingsManager.eeg.token));
 
             ImGui::Text("Polling Rate");
-            int ShimmerPollingRate = 20;
-            ImGui::SliderInt("", &ShimmerPollingRate, 1, 30);
+            ImGui::SliderInt("EEG Polling Rate", &gameLogic->settingsManager.eeg.pollrate, 1, 30, "%d Hz");
 
             ImGui::Button("Connect", ImVec2(100, 50));
             ImGui::SameLine();
@@ -440,7 +502,7 @@ void ImguiUI::settingsMenue() {
 
             ImGui::Text("Python Log");
             char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
-            ImGui::InputTextMultiline("", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+            ImGui::InputTextMultiline("EEG Python Log", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
             ImGui::EndTabItem();
         }
@@ -450,8 +512,7 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("Moving Head");
 
             ImGui::Text("StepSize");
-            int StepSize = 20;
-            ImGui::SliderInt("", &StepSize, 1, 30);
+            ImGui::SliderInt("", &gameLogic->settingsManager.head.step_size, 1, 30, "%d deg");
 
             ImGui::Button("Connect", ImVec2(100, 50));
             ImGui::SameLine();
@@ -472,10 +533,19 @@ void ImguiUI::settingsMenue() {
 
         ImGui::EndTabBar();
     }
+    ImGui::EndChild();
 
-    ImGui::Button("Save", ImVec2(100, 50));
+    ImGui::BeginChild("ButtonArea", ImVec2(0, io.DisplaySize.y * 0.1), false, ImGuiWindowFlags_NoScrollbar);
+    if (ImGui::Button("Save", ImVec2(100, 50))){
+        gameLogic->settingsManager.saveSettings();
+    }
     ImGui::SameLine();
-    ImGui::Button("Cancel", ImVec2(100, 50));
+    if (ImGui::Button("Cancel", ImVec2(100, 50))){
+        gameLogic->settingsManager.loadSettings();
+        gameLogic->dstate.show_settings = false;
+        gameLogic->dstate.show_main_menue = true;
+    }
+    ImGui::EndChild();
 
     ImGui::End();
 }
@@ -539,14 +609,19 @@ void ImguiUI::mainMenue() {
 
     ImGui::SetCursorPosX(windowSize.x * 0.1);
     if (ImGui::Button("Start", ImVec2(windowSize.x * 0.8, 0))) {
+        gameLogic->startGame();
+        gameLogic->dstate.show_main_menue = false;
     }
 
     ImGui::SetCursorPosX(windowSize.x * 0.1);
     if (ImGui::Button("Settings", ImVec2(windowSize.x * 0.8, 0))) {
+        gameLogic->dstate.show_settings = true;
+        gameLogic->dstate.show_main_menue = false;
     }
 
     ImGui::SetCursorPosX(windowSize.x * 0.1);
     if (ImGui::Button("Exit", ImVec2(windowSize.x * 0.8, 0))) {
+        gameLogic->QuitApp();
     }
 
     ImGui::PopStyleVar(2);

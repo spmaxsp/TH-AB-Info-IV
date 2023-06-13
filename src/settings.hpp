@@ -12,21 +12,25 @@
 #define SENSOR_EEG 1
 #define SENSOR_VIRTUAL 2
 
+#define TIME_30 0
+#define TIME_60 1
+#define TIME_90 2
+
 using json = nlohmann::json;
 
 struct ShimmerSettings {
-    std::string com;
+    char com[50];
     int pollrate;
 };
 
 struct EegSettings {
-    std::string user_id;
-    std::string token;
+    char user_id[100];
+    char token[100];
     int pollrate;
 };
 
 struct HeadSettings {
-    float step_size;
+    int step_size;
 };
 
 struct MainSettings {
@@ -37,7 +41,7 @@ struct MainSettings {
 };
 
 struct PythonSettings {
-    std::string path;
+    char path[300];
     bool clean_exit_flag;
 };
 
@@ -68,11 +72,11 @@ public:
         file.close();
 
         try {
-            shimmer.com = settingsData["shimmer"]["com"];
+            strcpy(shimmer.com, settingsData["shimmer"]["com"].get<std::string>().c_str());
             shimmer.pollrate = settingsData["shimmer"]["pollrate"];
 
-            eeg.user_id = settingsData["eeg"]["user_id"];
-            eeg.token = settingsData["eeg"]["token"];
+            strcpy(eeg.user_id, settingsData["eeg"]["user_id"].get<std::string>().c_str());
+            strcpy(eeg.token, settingsData["eeg"]["token"].get<std::string>().c_str());
             eeg.pollrate = settingsData["eeg"]["pollrate"];
 
             head.step_size = settingsData["head"]["step_size"];
@@ -82,7 +86,7 @@ public:
             main.time = settingsData["main"]["time"];
             main.virtual_head = settingsData["main"]["virtual_head"];
 
-            python.path = settingsData["python"]["path"];
+            strcpy(python.path, settingsData["python"]["path"].get<std::string>().c_str());
             python.clean_exit_flag = settingsData["python"]["clean_exit_flag"];
 
             score.high_score = settingsData["score"]["high_score"];
@@ -129,11 +133,11 @@ private:
     json settingsData;
 
     void createDefaultSettingsFile() {
-        shimmer.com = "COM1";
+        strcpy(shimmer.com, "COM3");
         shimmer.pollrate = 100;
 
-        eeg.user_id = "";
-        eeg.token = "";
+        strcpy(eeg.user_id, "");
+        strcpy(eeg.token, "");
         eeg.pollrate = 500;
 
         head.step_size = 0.1;
@@ -143,7 +147,7 @@ private:
         main.time = 60;
         main.virtual_head = false;
 
-        python.path = "/usr/bin/python3";
+        strcpy(python.path, "python");
         python.clean_exit_flag = true;
 
         score.high_score = 0;

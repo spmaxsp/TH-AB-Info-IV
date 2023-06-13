@@ -23,11 +23,19 @@ class GameLogic {
         //EEG* eeg;
         //Movinghead* movinghead;
 
+        SettingsManager settingsManager;
+
         Webcam* webcam;
 
         GameLogic(Shimmersensor* shimmersensor, Webcam* webcam);
+
+        void startGame();
+        void testPythonPath();
+        void killPythonProcesses();
+        void QuitApp();
+        
     
     private:
-        SettingsManager settingsManager;
+
 };
     
