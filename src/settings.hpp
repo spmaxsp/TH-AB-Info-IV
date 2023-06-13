@@ -55,7 +55,7 @@ public:
     ShimmerSettings shimmer;
     EegSettings eeg;
     HeadSettings head;
-    MainSettings main;
+    MainSettings global;
     PythonSettings python;
     ScoreSettings score;
 
@@ -81,10 +81,10 @@ public:
 
             head.step_size = settingsData["head"]["step_size"];
 
-            main.difficulty = settingsData["main"]["difficulty"];
-            main.sensor = settingsData["main"]["sensor"];
-            main.time = settingsData["main"]["time"];
-            main.virtual_head = settingsData["main"]["virtual_head"];
+            global.difficulty = settingsData["global"]["difficulty"];
+            global.sensor = settingsData["global"]["sensor"];
+            global.time = settingsData["global"]["time"];
+            global.virtual_head = settingsData["global"]["virtual_head"];
 
             strcpy(python.path, settingsData["python"]["path"].get<std::string>().c_str());
             python.clean_exit_flag = settingsData["python"]["clean_exit_flag"];
@@ -109,10 +109,10 @@ public:
 
         settingsData["head"]["step_size"] = head.step_size;
 
-        settingsData["main"]["difficulty"] = main.difficulty;
-        settingsData["main"]["sensor"] = main.sensor;
-        settingsData["main"]["time"] = main.time;
-        settingsData["main"]["virtual_head"] = main.virtual_head;
+        settingsData["global"]["difficulty"] = global.difficulty;
+        settingsData["global"]["sensor"] = global.sensor;
+        settingsData["global"]["time"] = global.time;
+        settingsData["global"]["virtual_head"] = global.virtual_head;
 
         settingsData["python"]["path"] = python.path;
         settingsData["python"]["clean_exit_flag"] = python.clean_exit_flag;
@@ -142,10 +142,10 @@ private:
 
         head.step_size = 0.1;
 
-        main.difficulty = DIFFICULTY_EASY;
-        main.sensor = SENSOR_SHIMMER;
-        main.time = 60;
-        main.virtual_head = false;
+        global.difficulty = DIFFICULTY_EASY;
+        global.sensor = SENSOR_SHIMMER;
+        global.time = 60;
+        global.virtual_head = false;
 
         strcpy(python.path, "python");
         python.clean_exit_flag = true;

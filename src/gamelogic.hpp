@@ -33,7 +33,9 @@ class GameLogic {
         void testPythonPath();
         void killPythonProcesses();
         void QuitApp();
-        
+        void pauseGame();
+        void resumeGame();
+        void endGame();
     
     private:
 
