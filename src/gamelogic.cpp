@@ -21,6 +21,12 @@ GameLogic::GameLogic(Shimmersensor* shimmersensor, Webcam* webcam) : settingsMan
         log(LOG_ERROR) << "Failed to load settings\n";
     }
 
+    // init webcam
+    this->webcam->initDevice(settingsManager.global.camera_index);
+
+    // Get first frame from webcam
+    this->webcam->getImage();
+
     // Test if python was exited correctly
     if (!this->settingsManager.python.clean_exit_flag) {
         this->dstate.show_py_err = true;
@@ -59,6 +65,9 @@ void GameLogic::startGame(){
 }
 
 void GameLogic::updateGame(){
+
+    // Update webcam
+    this->webcam->getImage();
 
     if (!this->gstate.GameRunning) {
         return;

@@ -67,7 +67,7 @@ int main(int, char**) {
     //Movinghead movinghead;
 
     // Init Webcam
-    Webcam webcam;
+    Webcam webcam(1280, 720);
 
     // Init GameLogic
     GameLogic game(&shimmersensor, &webcam);
@@ -77,24 +77,14 @@ int main(int, char**) {
 
     VulkanEngine app;
     app.InitVulkan(window, &imgui);
-    
-    cv::VideoCapture cap(0);
-    cv::Mat webcamImage;
 
     // run Main Loop
     while (handleEvents() && game.gstate.AppRunning) {
-        // Capture webcam image using OpenCV
-        cap.read(webcamImage);
-
-        // Convert the image format if necessary (e.g., from BGR to RGBA)
-        cv::Mat convertedImage;
-        cv::cvtColor(webcamImage, convertedImage, cv::COLOR_BGR2RGBA);
-
         // Update GameLogic
         game.updateGame();
 
         // Update Render
-        app.update(&convertedImage);
+        app.update(&webcam.webcamImage);
 
         // Render Vulkan
         app.render();

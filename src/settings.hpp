@@ -38,6 +38,7 @@ struct MainSettings {
     int sensor;
     int time;
     bool virtual_head;
+    int camera_index;
 };
 
 struct PythonSettings {
@@ -85,6 +86,7 @@ public:
             global.sensor = settingsData["global"]["sensor"];
             global.time = settingsData["global"]["time"];
             global.virtual_head = settingsData["global"]["virtual_head"];
+            global.camera_index = settingsData["global"]["camera_index"];
 
             strcpy(python.path, settingsData["python"]["path"].get<std::string>().c_str());
             python.clean_exit_flag = settingsData["python"]["clean_exit_flag"];
@@ -113,6 +115,7 @@ public:
         settingsData["global"]["sensor"] = global.sensor;
         settingsData["global"]["time"] = global.time;
         settingsData["global"]["virtual_head"] = global.virtual_head;
+        settingsData["global"]["camera_index"] = global.camera_index;
 
         settingsData["python"]["path"] = python.path;
         settingsData["python"]["clean_exit_flag"] = python.clean_exit_flag;
@@ -146,6 +149,7 @@ private:
         global.sensor = SENSOR_SHIMMER;
         global.time = 60;
         global.virtual_head = false;
+        global.camera_index = 0;
 
         strcpy(python.path, "python");
         python.clean_exit_flag = true;

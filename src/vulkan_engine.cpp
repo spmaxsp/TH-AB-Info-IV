@@ -98,7 +98,7 @@ void VulkanEngine::InitVulkan(SDL_Window* window, ImguiUI* imguiUI) {
     //indexBuffer.uploadBufferData(&copyCommandBuffer, &copyFence, &context, indexData, sizeof(indexData));
 
     // Create Image Buffer
-    webcamBuffer.createImgBuffer(&allocator, &context, { 640, 480, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+    webcamBuffer.createImgBuffer(&allocator, &context, { 1280, 720, 1 }, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
     // // Create Descriptor Set
     // VkDescriptorPoolSize poolSizes[] = {
@@ -252,7 +252,7 @@ void VulkanEngine::update(cv::Mat* image){
     imguiUI->newFrame();
 
     // Copy image data to buffer
-    webcamBuffer.uploadImgBuffer(&copyCommandBuffer, &copyFence, &context, image->data, image->cols * image->rows * 4, { 640, 480, 1 });
+    webcamBuffer.uploadImgBuffer(&copyCommandBuffer, &copyFence, &context, image->data, image->cols * image->rows * 4, { 1280, 720, 1 });
 
     //Wait for command buffer to finish
     VKA(vkWaitForFences(context.device, 1, &commandBufferFence, VK_TRUE, UINT64_MAX));
