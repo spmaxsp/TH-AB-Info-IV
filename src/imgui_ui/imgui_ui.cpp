@@ -391,11 +391,13 @@ void ImguiUI::pythonError() {
     if (ImGui::Button("OK, I closed all python instances")) {
         // Close error dialog
         gameLogic->dstate.show_py_err = false;
+        gameLogic->dstate.show_main_menue = true;
     }
     ImGui::SameLine();
     if (ImGui::Button("KILL ALL PYTHON INSTANCES")) {
         // Close error dialog
         gameLogic->dstate.show_py_err = false;
+        gameLogic->dstate.show_main_menue = true;
         gameLogic->killPythonProcesses();
     }
 
@@ -412,9 +414,9 @@ void ImguiUI::settingsMenue() {
     ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
     ImGui::SetNextWindowPos(windowPos);
     ImGui::SetNextWindowSize(windowSize);
-    ImGui::Begin("Settings");
+    ImGui::Begin("Settings", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar);
 
-    ImGui::BeginChild("ScrollableContainer", ImVec2(0, io.DisplaySize.y * 0.9 - 80), true);
+    ImGui::BeginChild("ScrollableContainer", ImVec2(0, windowSize.y - 150), true);
     if (ImGui::BeginTabBar("SettingsTabBar"))
     {
         if (ImGui::BeginTabItem("Global"))
@@ -517,7 +519,7 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("Moving Head");
 
             ImGui::Text("StepSize");
-            ImGui::SliderInt("", &gameLogic->settingsManager.head.step_size, 1, 30, "%d deg");
+            ImGui::SliderInt("MH Step Size", &gameLogic->settingsManager.head.step_size, 1, 30, "%d deg");
 
             ImGui::Button("Connect", ImVec2(100, 50));
             ImGui::SameLine();
@@ -531,7 +533,7 @@ void ImguiUI::settingsMenue() {
 
             ImGui::Text("Python Log");
             char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
-            ImGui::InputTextMultiline("", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+            ImGui::InputTextMultiline("MH Python Log", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
             ImGui::EndTabItem();
         }
@@ -540,7 +542,7 @@ void ImguiUI::settingsMenue() {
     }
     ImGui::EndChild();
 
-    ImGui::BeginChild("ButtonArea", ImVec2(0, 80), false, ImGuiWindowFlags_NoScrollbar);
+    ImGui::BeginChild("ButtonArea", ImVec2(0, 60), false, ImGuiWindowFlags_NoScrollbar);
     if (ImGui::Button("Save", ImVec2(100, 50))){
         gameLogic->settingsManager.saveSettings();
         gameLogic->dstate.show_settings = false;
@@ -627,7 +629,7 @@ void ImguiUI::mainMenue() {
 
     ImGui::SetCursorPosX(windowSize.x * 0.1);
     if (ImGui::Button("Exit", ImVec2(windowSize.x * 0.8, 0))) {
-        gameLogic->QuitApp();
+        gameLogic->gstate.AppRunning = false;
     }
 
     ImGui::PopStyleVar(2);

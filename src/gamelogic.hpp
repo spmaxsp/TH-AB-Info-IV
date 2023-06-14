@@ -13,6 +13,8 @@
 //#include "py_extention/modules/EEG/EEG.hpp"
 //#include "py_extention/modules/Movinghead/Movinghead.hpp"
 
+#include <chrono>
+
 
 class GameLogic {
     public:
@@ -35,9 +37,15 @@ class GameLogic {
         void QuitApp();
         void pauseGame();
         void resumeGame();
+        void updateGame();
         void endGame();
     
     private:
+        std::chrono::steady_clock::time_point start_time;
+
+        int time_to_reach_target = 0;
+
+        void setNewTargetPosition();
 
 };
     

@@ -82,7 +82,7 @@ int main(int, char**) {
     cv::Mat webcamImage;
 
     // run Main Loop
-    while (handleEvents()) {
+    while (handleEvents() && game.gstate.AppRunning) {
         // Capture webcam image using OpenCV
         cap.read(webcamImage);
 
@@ -90,12 +90,18 @@ int main(int, char**) {
         cv::Mat convertedImage;
         cv::cvtColor(webcamImage, convertedImage, cv::COLOR_BGR2RGBA);
 
-        // Update Game State
+        // Update GameLogic
+        game.updateGame();
+
+        // Update Render
         app.update(&convertedImage);
 
         // Render Vulkan
         app.render();
     }
+
+    // Quit GameLogic
+    game.QuitApp();
     
     // Exit Vulkan
     app.ExitVulkan();

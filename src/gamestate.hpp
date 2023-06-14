@@ -2,6 +2,7 @@
 
 struct gamestate {
     bool GameRunning;
+    bool AppRunning;
 
     int TargetPosX;
     int TargetPosY;
