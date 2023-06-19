@@ -23,22 +23,37 @@ set(SOURCE_FILES
 
     src/py_extention/websocket/SocketClient.cpp  ### socket client
 
-    src/py_extention/modules/ModuleTemplate/PyModule.cpp
-
-    #src/py_extention/modules/Shimmersensor/Shimmersensor.cpp
+    src/py_extention/modules/ModuleTemplate/PyModule.cpp    ### py-modules
+    src/py_extention/modules/Shimmersensor/Shimmersensor.cpp
     src/py_extention/modules/EEG/EEG.cpp
+    src/py_extention/modules/Movinghead/Movinghead.cpp
 
     src/py_extention/modules/ModuleTemplate/proto/PyModuleProt.pb.cc  ### protobuf
+    src/py_extention/modules/Shimmersensor/proto/ShimmersensorProt.pb.cc
     src/py_extention/modules/EEG/proto/EEGProt.pb.cc
+    src/py_extention/modules/Movinghead/proto/MovingheadProt.pb.cc
 
     src/vulkan_base/vulkan_device.cpp       ### vulkan
+    src/vulkan_base/vulkan_swapchain.cpp
+    src/vulkan_base/vulkan_renderpass.cpp
+    src/vulkan_base/vulkan_cmdbuffer.cpp
+    src/vulkan_base/vulkan_pipeline.cpp
+    src/vulkan_base/vulkan_utils.cpp
+    
+    src/vulkan_engine.cpp
+
+    src/imgui_ui/imgui_ui.cpp               ### imgui
+
+    src/gamelogic.cpp                       ### game logic
+
+    src/cv2_cam/webcam.cpp                  ### opencv
 )
 
 ####################  EXECUTABLE  ####################
 
 ### add executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-
+target_include_directories(${PROJECT_NAME} PRIVATE src)
 
 #################### LIBRARIES ####################
 
@@ -57,16 +72,6 @@ find_package(Vulkan REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${Vulkan_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Vulkan_INCLUDE_DIRS})
 
-### include Python
-#find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-#target_link_libraries(${PROJECT_NAME} ${Python3_LIBRARIES})
-#target_include_directories(${PROJECT_NAME} PRIVATE ${Python3_INCLUDE_DIRS})
-
-### include Python numpy
-#find_package(Python3 REQUIRED COMPONENTS NumPy)
-#target_link_libraries(${PROJECT_NAME} ${Python3_NumPy_LIBRARIES})
-#target_include_directories(${PROJECT_NAME} PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
-
 ### include socket (dll)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     target_link_libraries(${PROJECT_NAME} ws2_32)
@@ -79,26 +84,68 @@ find_package(Protobuf REQUIRED)
 target_link_libraries(${PROJECT_NAME} ${Protobuf_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Protobuf_INCLUDE_DIRS})
 
+### include opencv2
+find_package(OpenCV REQUIRED)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
+
+### Vulkan Memory Allocator (header only)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/vma)
+
+### Logger (header only)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/bslogger)
+
+### JSON (header only)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/json/single_include/nlohmann)
+
 #################### COMPILE OPTIONS ####################
 
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
-#################### POST BUILD ####################
+# #################### SHADERS ####################
 
-### copy Python dll
-#if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${Python3_RUNTIME_LIBRARY_DIRS}/python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}.dll ${PROJECT_SOURCE_DIR}/bin)
-#endif()
+# if (UNIX)
+# add_custom_target(build_shaders ALL
+#     COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.sh"
+#     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
+# )
+# endif(UNIX)
+
+# if (WIN32)
+# add_custom_target(build_shaders ALL
+#     COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.bat"
+#     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
+# )
+# endif(WIN32)
+
+# add_dependencies(${PROJECT_NAME} build_shaders)
+
+# #################### COPY SHADERS ####################
+
+# ### Copy shaders
+# file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/shaders/*.spv)
+# ### Display files
+# message(STATUS "Shader files: ${SHADER_FILES}")
+
+# ### Copy files
+# add_custom_target(copy_shaders ALL
+#     COMMENT "Copying shaders to shaders directory"
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILES} ${PROJECT_SOURCE_DIR}/bin/shaders
+#     DEPENDS build_shaders)
+
+# ### Add dependencies
+# add_dependencies(${PROJECT_NAME} copy_shaders)
+
+#################### POST BUILD ####################
 
 ### copy Python scripts
 file(GLOB_RECURSE PY_FILES ${PROJECT_SOURCE_DIR}/src/py_extention/modules/*.py)
 ### display files
 message(STATUS "Python files: ${PY_FILES}")
 ### copy files
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy ${PY_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
-                    COMMENT "Copying Python modules to scripts directory"
-                    VERBATIM
-                    ALWAYS)
+add_custom_target(copy_py ALL
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PY_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
+                    COMMENT "Copying Python files to bin directory" )
+
+add_dependencies(${PROJECT_NAME} copy_py)
 

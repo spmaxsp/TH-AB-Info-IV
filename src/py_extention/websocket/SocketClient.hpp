@@ -12,7 +12,7 @@
     #include <unistd.h> 
 #endif
 
-#include "../../BSlogger.hpp"
+#include <BSlogger.hpp>
 
 class SocketClient {
 private:

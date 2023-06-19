@@ -17,6 +17,8 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 HOST = '127.0.0.1'        # Local host
 PORT = 50008              # Arbitrary port
 
+RATE = 30 # Hz
+
 global streaming
 streaming = False
 
@@ -44,18 +46,25 @@ class Shimmersensor:
     accel_ln_y = 0
     accel_ln_z = 0
 
+    sensor_con_stat = False
+
     def StarteSensor(self):
         print("Starting sensor...")
-        serial = Serial('COM5', DEFAULT_BAUDRATE)
+        print("Connecting to bluetooth device...")
+        serial = Serial('COM7', DEFAULT_BAUDRATE)
         shim_dev = ShimmerBluetooth(serial)
 
+        print("Initializing sensor...")
         shim_dev.initialize()
 
+        print("Getting device name...")
         dev_name = shim_dev.get_device_name()
         print(f'Sensor name is: {dev_name}')
 
+        print("Registering callback...")
         shim_dev.add_stream_callback(Handler)
 
+        print("Starting streaming...")
         shim_dev.start_streaming()
 
 
@@ -92,7 +101,7 @@ async def handle_client(reader, writer):
                 except ConnectionResetError:
                     print(f"Client {addr} disconnected")
                     break
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(1/RATE)
 
     async def receive_data():
         global streaming

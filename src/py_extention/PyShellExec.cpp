@@ -75,7 +75,7 @@ bool PyShellExec::run(std::vector<std::string> args){
             return false;
         }
 
-    pid = fork();
+    pid = ();
     if (pid == -1) {
         std::cerr << "Error: could not start process" << std::endl;
     } 

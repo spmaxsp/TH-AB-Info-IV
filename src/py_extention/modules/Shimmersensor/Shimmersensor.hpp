@@ -6,7 +6,7 @@
 #include "../../PyShellExec.hpp"
 #include "../../websocket/SocketClient.hpp"
 
-#include "../../../BSlogger.hpp"
+#include <BSlogger.hpp>
 
 #include "proto/ShimmersensorProt.pb.h"
 
@@ -27,4 +27,8 @@ class Shimmersensor {
         void stopStream();
 
         void readData();
+
+        int accel_ln_x;
+        int accel_ln_y;
+        int accel_ln_z;
 };

@@ -1,72 +1,107 @@
 #include <stdlib.h>
-#include <SDL.h>
-#include <SDL_vulkan.h>
-#include <vulkan/vulkan.h>
 
-#include "vulkan_base/vulkan_base.hpp"
+#include "vulkan_engine.hpp"
+#include "imgui_ui/imgui_ui.hpp"
 
-#include "BSlogger.hpp"
+#include "gamelogic.hpp"
 
-//#include "py_extention/PyRunner.hpp"
-#include "py_extention/PyShellExec.hpp"
 //#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
 #include "py_extention/modules/EEG/EEG.hpp"
+#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
+#include "py_extention/modules/Movinghead/Movinghead.hpp"
 
-#include <Windows.h>
+#include <BSlogger.hpp>
 
-int main(int argc, char *argv[]) {
-    // Initializing logger
+#ifdef _WIN32
+    #include <Windows.h>
+#else
+    #include <unistd.h>
+    #define Sleep(x) usleep((x)*1000)
+#endif
+
+#define _DEBUG
+
+bool handleEvents() {
+	ImGuiIO& io = ImGui::GetIO();
+
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		ImGui_ImplSDL2_ProcessEvent(&event);
+
+		switch (event.type) {
+		case SDL_QUIT:
+			return false;
+		case SDL_KEYDOWN:
+			if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE && !io.WantCaptureKeyboard) {
+				SDL_SetRelativeMouseMode(SDL_FALSE);
+			}
+		case SDL_MOUSEBUTTONDOWN:
+			if(event.button.button == SDL_BUTTON_LEFT && !io.WantCaptureMouse) {
+				SDL_SetRelativeMouseMode(SDL_TRUE);
+			}
+			break;
+		}
+	}
+	return true;
+}
+
+int main(int, char**) {
+    // Initiate logger (default name is 'log')
     LOG_INIT_CERR();
+
+    // Init SDL and create a window
+    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+        log(LOG_ERROR) << "SDL_Init Error: " << SDL_GetError() << "\n";
+        return 1;
+    }
+
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+    SDL_Window* window = SDL_CreateWindow("Hello World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    if (window == nullptr) {
+        log(LOG_ERROR) << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
+        SDL_Quit();
+        return 1;
+    }
+
+    // Init Sensors
+    Shimmersensor shimmersensor;
+    EEG eeg;
+    Movinghead movinghead;
+
+    // Init Webcam
+    Webcam webcam(1280, 720);
+
+    // Init GameLogic
+    GameLogic game(&shimmersensor, &webcam);
+
+    // Initiate Vulkan and ImGui
+    ImguiUI imgui(&game);
+
+    VulkanEngine app;
+    app.InitVulkan(window, &imgui);
+
+    // run Main Loop
+    while (handleEvents() && game.gstate.AppRunning) {
+        // Update GameLogic
+        game.updateGame();
+
+        // Update Render
+        app.update(&webcam.webcamImage);
+
+        // Render Vulkan
+        app.render();
+    }
+
+    // Quit GameLogic
+    game.QuitApp();
     
-    log(LOG_INFO) << "Loading module\n";
-    EEG module;
+    // Exit Vulkan
+    app.ExitVulkan();
 
-    log(LOG_INFO) << "Running module\n";
-    module.run(10, "lcP2cs4kNNbl2ps9F8TeVDRiw59S1xq1APhphqzg", "LKcNIrVNbvtob0qGVg5dSm45nxoLaAiDj8qfW1HjiPGTe4QgowIGzFuOXXMCy5d7xuXcateRNNy38GPZO8KtxKdfJiPfxd8Vh6OkAV5iZ6qF9PpK1KsepVU1YqRFDMg3");
+    // Destroy window and quit SDL
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
-    Sleep(500);
-
-    log(LOG_INFO) << "Connecting to module\n";
-    module.connect();
-
-    Sleep(1000);
-
-    while(!module.getInitState()){
-      module.pollInitState();
-      Sleep(2000);
-    }
-
-    log(LOG_INFO) << "Getting profiles\n";
-    std::vector<std::string> profiles = module.getProfiles();
-
-    log(LOG_INFO) << "Profiles:\n";
-    for (auto profile : profiles) {
-        log(LOG_INFO) << profile << "\n";
-    }
-
-    Sleep(2000);
-
-    log(LOG_INFO) << "Setting profile\n";
-    module.setProfile("ayberk");
-
-    Sleep(1000);
-
-    log(LOG_INFO) << "Starting stream\n";
-    module.startStream();
-
-    Sleep(500);
-
-    log(LOG_INFO) << "Reading data\n";
-    for (int i = 0; i < 5; i++) {
-        module.getLatestDataPacket();
-        Sleep(1000);
-    }
-
-    log(LOG_INFO) << "Stopping stream\n";
-    module.stopStream();
-
-    log(LOG_INFO) << "Stopping module\n";
-    module.stop();
-
+    log(LOG_INFO) << "Exiting\n";
     return 0;
 }
