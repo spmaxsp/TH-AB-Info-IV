@@ -40,6 +40,10 @@ set(SOURCE_FILES
     src/vulkan_engine.cpp
 
     src/imgui_ui/imgui_ui.cpp               ### imgui
+
+    src/gamelogic.cpp                       ### game logic
+
+    src/cv2_cam/webcam.cpp                  ### opencv
 )
 
 ####################  EXECUTABLE  ####################
@@ -88,43 +92,46 @@ target_include_directories(${PROJECT_NAME} PRIVATE libs/vma)
 ### Logger (header only)
 target_include_directories(${PROJECT_NAME} PRIVATE libs/bslogger)
 
+### JSON (header only)
+target_include_directories(${PROJECT_NAME} PRIVATE libs/json/single_include/nlohmann)
+
 #################### COMPILE OPTIONS ####################
 
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
-#################### SHADERS ####################
+# #################### SHADERS ####################
 
-if (UNIX)
-add_custom_target(build_shaders ALL
-    COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.sh"
-    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
-)
-endif(UNIX)
+# if (UNIX)
+# add_custom_target(build_shaders ALL
+#     COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.sh"
+#     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
+# )
+# endif(UNIX)
 
-if (WIN32)
-add_custom_target(build_shaders ALL
-    COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.bat"
-    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
-)
-endif(WIN32)
+# if (WIN32)
+# add_custom_target(build_shaders ALL
+#     COMMAND "${PROJECT_SOURCE_DIR}/shaders/compile.bat"
+#     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/shaders"
+# )
+# endif(WIN32)
 
-add_dependencies(${PROJECT_NAME} build_shaders)
+# add_dependencies(${PROJECT_NAME} build_shaders)
 
-#################### COPY SHADERS ####################
+# #################### COPY SHADERS ####################
 
-### Copy shaders
-file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/shaders/*.spv)
-### Display files
-message(STATUS "Shader files: ${SHADER_FILES}")
+# ### Copy shaders
+# file(GLOB_RECURSE SHADER_FILES ${PROJECT_SOURCE_DIR}/shaders/*.spv)
+# ### Display files
+# message(STATUS "Shader files: ${SHADER_FILES}")
 
-### Copy files
-add_custom_target(copy_shaders ALL
-    COMMENT "Copying shaders to shaders directory"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILES} ${PROJECT_SOURCE_DIR}/bin/shaders
-    DEPENDS build_shaders)
+# ### Copy files
+# add_custom_target(copy_shaders ALL
+#     COMMENT "Copying shaders to shaders directory"
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHADER_FILES} ${PROJECT_SOURCE_DIR}/bin/shaders
+#     DEPENDS build_shaders)
 
-### Add dependencies
-add_dependencies(${PROJECT_NAME} copy_shaders)
+# ### Add dependencies
+# add_dependencies(${PROJECT_NAME} copy_shaders)
 
 #################### POST BUILD ####################
 

@@ -1,12 +1,16 @@
 #pragma once
 
 struct gamestate {
-    bool running;
-    bool sensor_shimmer_connected;
-    bool sensor_eeg_connected;
+    bool GameRunning;
+    bool AppRunning;
 
-    bool show_settings;
-    bool show_menu;
+    int TargetPosX;
+    int TargetPosY;
 
-    bool pause;
+    int CurrentPosX;
+    int CurrentPosY;
+
+    int CurrentTime;
+
+    int CurrentScore;
 };

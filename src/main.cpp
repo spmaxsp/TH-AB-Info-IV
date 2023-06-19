@@ -1,15 +1,11 @@
 #include <stdlib.h>
 
 #include "vulkan_engine.hpp"
+#include "imgui_ui/imgui_ui.hpp"
 
-#include "gamestate.hpp"
+#include "gamelogic.hpp"
 
 #include <BSlogger.hpp>
-
-#include "py_extention/PyShellExec.hpp"
-
-//#include "py_extention/modules/ModuleTemplate/PyModule.hpp"
-#include "py_extention/modules/Shimmersensor/Shimmersensor.hpp"
 
 #ifdef _WIN32
     #include <Windows.h>
@@ -65,34 +61,37 @@ int main(int, char**) {
         return 1;
     }
 
-    // Init Game State
-    gamestate gstate = {};
+    // Init Sensors
+    Shimmersensor shimmersensor;
+    //EEG eeg;
+    //Movinghead movinghead;
 
-    // Init ImGui
-    ImguiUI imgui;
+    // Init Webcam
+    Webcam webcam(1280, 720);
 
-    // Initiate Vulkan
+    // Init GameLogic
+    GameLogic game(&shimmersensor, &webcam);
+
+    // Initiate Vulkan and ImGui
+    ImguiUI imgui(&game);
+
     VulkanEngine app;
     app.InitVulkan(window, &imgui);
 
-    cv::VideoCapture cap(0);
-    cv::Mat webcamImage;
-
     // run Main Loop
-    while (handleEvents()) {
-        // Capture webcam image using OpenCV
-        cap.read(webcamImage);
+    while (handleEvents() && game.gstate.AppRunning) {
+        // Update GameLogic
+        game.updateGame();
 
-        // Convert the image format if necessary (e.g., from BGR to RGBA)
-        cv::Mat convertedImage;
-        cv::cvtColor(webcamImage, convertedImage, cv::COLOR_BGR2RGBA);
-
-        // Update Game State
-        app.update(gstate, true, &convertedImage);
+        // Update Render
+        app.update(&webcam.webcamImage);
 
         // Render Vulkan
         app.render();
     }
+
+    // Quit GameLogic
+    game.QuitApp();
     
     // Exit Vulkan
     app.ExitVulkan();
