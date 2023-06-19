@@ -6,7 +6,7 @@
 #include "../../PyShellExec.hpp"
 #include "../../websocket/SocketClient.hpp"
 
-#include "../../../BSlogger.hpp"
+#include <BSlogger.hpp>
 
 #include "proto/EEGProt.pb.h"
 
@@ -28,7 +28,7 @@ class EEG {
         std::vector<std::string> profiles;
 
     public:
-        EEG();
+        EEG(std::string py_path);
         ~EEG();
 
         void run(int polling_rate, std::string userID, std::string token);
@@ -37,19 +37,23 @@ class EEG {
         void connect();
         void disconnect();
 
+        // Control Commands
+        void pollInitState();
+
+        void setProfile(std::string profile);
+
         void startStream();
         void stopStream();
 
-        void pollInitState();
-        void setProfile(std::string profile);
-
         void readDataStream();
 
+        // Getter
         std::string getLogs();
         bool getRunningState();
         bool getConnectedState();
         bool getInitState();
         bool getStreamingState();
+
         std::string getLatestDataPacket();
         std::vector<std::string> getProfiles();
 };

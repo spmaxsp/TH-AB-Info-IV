@@ -467,19 +467,53 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("Polling Rate");
             ImGui::SliderInt("Shimmer Polling Rate", &gameLogic->settingsManager.shimmer.pollrate, 1, 30, "%d Hz");
 
-            ImGui::Button("Connect", ImVec2(100, 50));
+            if (ImGui::Button("Start", ImVec2(100, 50))) {
+                if (!gameLogic->shimmersensor->getRunningState()){
+                    gameLogic->shimmersensor->run(gameLogic->settingsManager.shimmer.pollrate, gameLogic->settingsManager.shimmer.com);
+                }
+            }
             ImGui::SameLine();
-            ImGui::Button("Disconnect", ImVec2(100, 50));
+            if (ImGui::Button("Stop", ImVec2(100, 50))) {
+                if (gameLogic->shimmersensor->getRunningState()){
+                    gameLogic->shimmersensor->stop();
+                }
+            }
+            
+            if (ImGui::Button("Connect", ImVec2(100, 50))) {
+                if (gameLogic->shimmersensor->getRunningState()){
+                    gameLogic->shimmersensor->connect();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Disconnect", ImVec2(100, 50))) {
+                if (gameLogic->shimmersensor->getRunningState()){
+                    gameLogic->shimmersensor->disconnect();
+                }
+            }
 
             ImGui::Text("Sensor Status");
-            char ShimmerStatus[] = "Connected";
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
-            ImGui::Text(ShimmerStatus, IM_ARRAYSIZE(ShimmerStatus));
-            ImGui::PopStyleColor();
+            if (gameLogic->shimmersensor->getRunningState()){
+                if (gameLogic->shimmersensor->getConnectedState()){
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+                    ImGui::Text("Connected");
+                    ImGui::PopStyleColor();
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                    ImGui::Text("Disconnected");
+                    ImGui::PopStyleColor();
+                }
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+                ImGui::Text("Stopped");
+                ImGui::PopStyleColor();
+            }
 
             ImGui::Text("Python Log");
-            char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
-            ImGui::InputTextMultiline("Shimmer Python log", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+            char shimmer_log[500];
+            strcpy(shimmer_log, gameLogic->shimmersensor->getLogs().c_str());
+            ImGui::InputTextMultiline("Shimmer Python log", shimmer_log, IM_ARRAYSIZE(shimmer_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
             ImGui::EndTabItem();
         }
@@ -497,19 +531,53 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("Polling Rate");
             ImGui::SliderInt("EEG Polling Rate", &gameLogic->settingsManager.eeg.pollrate, 1, 30, "%d Hz");
 
-            ImGui::Button("Connect", ImVec2(100, 50));
+            if (ImGui::Button("Start", ImVec2(100, 50))) {
+                if (!gameLogic->eeg->getRunningState()){
+                    gameLogic->eeg->run(gameLogic->settingsManager.eeg.pollrate, gameLogic->settingsManager.eeg.user_id, gameLogic->settingsManager.eeg.token);
+                }
+            }
             ImGui::SameLine();
-            ImGui::Button("Disconnect", ImVec2(100, 50));
+            if (ImGui::Button("Stop", ImVec2(100, 50))) {
+                if (gameLogic->eeg->getRunningState()){
+                    gameLogic->eeg->stop();
+                }
+            }
+            
+            if (ImGui::Button("Connect", ImVec2(100, 50))) {
+                if (gameLogic->eeg->getRunningState()){
+                    gameLogic->eeg->connect();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Disconnect", ImVec2(100, 50))) {
+                if (gameLogic->eeg->getRunningState()){
+                    gameLogic->eeg->disconnect();
+                }
+            }
 
             ImGui::Text("Sensor Status");
-            char ShimmerStatus[] = "Connected";
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
-            ImGui::Text(ShimmerStatus, IM_ARRAYSIZE(ShimmerStatus));
-            ImGui::PopStyleColor();
+            if (gameLogic->eeg->getRunningState()){
+                if (gameLogic->eeg->getConnectedState()){
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+                    ImGui::Text("Connected");
+                    ImGui::PopStyleColor();
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                    ImGui::Text("Disconnected");
+                    ImGui::PopStyleColor();
+                }
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+                ImGui::Text("Stopped");
+                ImGui::PopStyleColor();
+            }
 
             ImGui::Text("Python Log");
-            char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
-            ImGui::InputTextMultiline("EEG Python Log", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+            char eeg_log[500];
+            strcpy(eeg_log, gameLogic->eeg->getLogs().c_str());
+            ImGui::InputTextMultiline("EEG Python Log", eeg_log, IM_ARRAYSIZE(eeg_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
             ImGui::EndTabItem();
         }
@@ -521,19 +589,53 @@ void ImguiUI::settingsMenue() {
             ImGui::Text("StepSize");
             ImGui::SliderInt("MH Step Size", &gameLogic->settingsManager.head.step_size, 1, 30, "%d deg");
 
-            ImGui::Button("Connect", ImVec2(100, 50));
+            if (ImGui::Button("Start", ImVec2(100, 50))) {
+                if (!gameLogic->movinghead->getRunningState()){
+                    gameLogic->movinghead->run(gameLogic->settingsManager.head.step_size);
+                }
+            }
             ImGui::SameLine();
-            ImGui::Button("Disconnect", ImVec2(100, 50));
-
+            if (ImGui::Button("Stop", ImVec2(100, 50))) {
+                if (gameLogic->movinghead->getRunningState()){
+                    gameLogic->movinghead->stop();
+                }
+            }
+            
+            if (ImGui::Button("Connect", ImVec2(100, 50))) {
+                if (gameLogic->movinghead->getRunningState()){
+                    gameLogic->movinghead->connect();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Disconnect", ImVec2(100, 50))) {
+                if (gameLogic->movinghead->getRunningState()){
+                    gameLogic->movinghead->disconnect();
+                }
+            }
+        
             ImGui::Text("Sensor Status");
-            char ShimmerStatus[] = "Connected";
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
-            ImGui::Text(ShimmerStatus, IM_ARRAYSIZE(ShimmerStatus));
-            ImGui::PopStyleColor();
+            if (gameLogic->movinghead->getRunningState()){
+                if (gameLogic->movinghead->getConnectedState()){
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+                    ImGui::Text("Connected");
+                    ImGui::PopStyleColor();
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                    ImGui::Text("Disconnected");
+                    ImGui::PopStyleColor();
+                }
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+                ImGui::Text("Stopped");
+                ImGui::PopStyleColor();
+            }
 
             ImGui::Text("Python Log");
-            char pythonLog[] = "Lorem ipsum dolor sit amet, consectetur \n adipiscing elit. Donec euismod, nisl eget ultricies ultrices, \n nunc nisl ultricies nisl, nec\n aliquam nisl nisl vitae";
-            ImGui::InputTextMultiline("MH Python Log", pythonLog, IM_ARRAYSIZE(pythonLog), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
+            char mh_log[500];
+            strcpy(mh_log, gameLogic->movinghead->getLogs().c_str());
+            ImGui::InputTextMultiline("MH Python Log", mh_log, IM_ARRAYSIZE(mh_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
             ImGui::EndTabItem();
         }

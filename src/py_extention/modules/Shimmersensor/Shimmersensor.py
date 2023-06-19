@@ -14,10 +14,17 @@ import sys
 # Add the path to the module to the system path
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
-HOST = '127.0.0.1'        # Local host
-PORT = 50008              # Arbitrary port
+#HOST = '127.0.0.1'        # Local host
+#PORT = 50008              # Arbitrary port
 
-RATE = 30 # Hz
+#RATE = 30 # Hz
+
+PORT = sys.argv[1]
+HOST = sys.argv[2]
+
+RATE = sys.argv[3]
+
+COM = sys.argv[4]
 
 global streaming
 streaming = False
@@ -51,7 +58,7 @@ class Shimmersensor:
     def StarteSensor(self):
         print("Starting sensor...")
         print("Connecting to bluetooth device...")
-        serial = Serial('COM7', DEFAULT_BAUDRATE)
+        serial = Serial(COM, DEFAULT_BAUDRATE)
         shim_dev = ShimmerBluetooth(serial)
 
         print("Initializing sensor...")

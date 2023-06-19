@@ -10,8 +10,13 @@ import sys
 # Add the path to the module to the system path
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
-HOST = '127.0.0.1'  # Local host
-PORT = 50009  # Arbitrary port
+#HOST = '127.0.0.1'  # Local host
+#PORT = 50009  # Arbitrary port
+
+PORT = sys.argv[1]
+HOST = sys.argv[2]
+
+ANGLE = sys.argv[3]
 
 global rechts
 global links

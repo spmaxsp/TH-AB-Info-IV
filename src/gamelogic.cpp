@@ -1,6 +1,6 @@
 #include "gamelogic.hpp"
 
-GameLogic::GameLogic(Shimmersensor* shimmersensor, Webcam* webcam) : settingsManager("settings.json") {
+GameLogic::GameLogic(Shimmersensor* shimmersensor, EEG* eeg, Movinghead* movinghead, Webcam* webcam) : settingsManager("settings.json") {
     LOG_INIT_CERR();
 
     this->gstate = {};
@@ -13,8 +13,8 @@ GameLogic::GameLogic(Shimmersensor* shimmersensor, Webcam* webcam) : settingsMan
 
     this->shimmersensor = shimmersensor;
     this->webcam = webcam;
-    //this->eeg = eeg;
-    //this->movinghead = movinghead;
+    this->eeg = eeg;
+    this->movinghead = movinghead;
 
     // Load settings
     if (!settingsManager.loadSettings()) {

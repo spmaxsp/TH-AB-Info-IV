@@ -1,22 +1,37 @@
 #include "Shimmersensor.hpp"
 
-Shimmersensor::Shimmersensor() : shell_exec("python -u", "scripts/Shimmersensor.py", {}), client("127.0.0.1", 50008) {
+Shimmersensor::Shimmersensor(std::string py_path) : shell_exec(py_path, "scripts/Shimmersensor.py"), client(SHIMMER_HOST, SHIMMER_PORT) {
 }
 
 Shimmersensor::~Shimmersensor() {
     shell_exec.stop();
 }
 
-void Shimmersensor::run() {
-    shell_exec.run();
+void Shimmersensor::run(int polling_rate, std::string port) {
+    std::vector<std::string> args;
+
+    args.push_back(std::to_string(SHIMMER_PORT));
+    args.push_back(SHIMMER_HOST);
+    args.push_back(std::to_string(polling_rate));
+    args.push_back(port);
+
+    shell_exec.run(args);
 }
 
 void Shimmersensor::stop() {
     shell_exec.stop();
+    connected = false;
+    streaming = false;
 }
 
 void Shimmersensor::connect() {
     client.sockConnect();
+    connected = true;
+}
+
+void Shimmersensor::disconnect() {
+    client.sockDisconnect();
+    connected = false;
 }
 
 void Shimmersensor::startStream() {
@@ -40,9 +55,10 @@ void Shimmersensor::stopStream() {
     pb.SerializeToString(&data);
     client.sockSend(data);
 
+    streaming = false;
 }
 
-void Shimmersensor::readData() {
+void Shimmersensor::readDataStream() {
     LOG_INIT_CERR();
 
     std::string data;
@@ -56,6 +72,38 @@ void Shimmersensor::readData() {
         accel_ln_x = pb.accel_ln_x();
         accel_ln_y = pb.accel_ln_y();
         accel_ln_z = pb.accel_ln_z();
+
+        if (pb.state() == ShimmersensorProt::State::STATE_STREAMING){
+            streaming = true; 
+        }
         log(LOG_INFO) << "Data:  (x):" << accel_ln_x << "  (y):" << accel_ln_y << "  (z):" << accel_ln_x << "\n";
     }
+}
+
+std::string Shimmersensor::getLogs() {
+    return shell_exec.getOutput();
+}
+
+bool Shimmersensor::getRunningState() {
+    return shell_exec.isRunning();
+}
+
+bool Shimmersensor::getConnectedState() {
+    return connected;
+}
+
+bool Shimmersensor::getStreamingState() {
+    return streaming;
+}
+
+int Shimmersensor::get_Accel_x() {
+    return accel_ln_x;
+}
+
+int Shimmersensor::get_Accel_y() {
+    return accel_ln_y;
+}
+
+int Shimmersensor::get_Accel_z() {
+    return accel_ln_z;
 }

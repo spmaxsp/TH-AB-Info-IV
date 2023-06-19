@@ -22,7 +22,7 @@ PyShellExec::~PyShellExec(){
 }
 
 void PyShellExec::generateCommand(std::string &command, std::string py_path, std::string py_script, std::vector<std::string> args){
-    command = py_path + " " + py_script;
+    command = py_path + " -u " + py_script;
     for (int i = 0; i < args.size(); i++){
         command += " " + args[i];
     }
@@ -134,6 +134,7 @@ void PyShellExec::readOutput(){
         if (bytesRead == 0) {
             break;
         }
+        this->output = this->output + buffer;
         if (!((buffer[0] == '\r' || buffer[0] == '\n') && buffer[2] == 0)) {
             std::cout << "\033[0;32m[PyShellExec]" << "[Thread " << std::this_thread::get_id() << "]\033[0m " << buffer << std::endl;
         }

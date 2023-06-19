@@ -1,6 +1,6 @@
 #include "EEG.hpp"
 
-EEG::EEG() : shell_exec("python -u", "scripts/EEG.py"), client(EEG_HOST, EEG_PORT) {
+EEG::EEG(std::string py_path) : shell_exec(py_path, "scripts/EEG.py"), client(EEG_HOST, EEG_PORT) {
 }
 
 EEG::~EEG() {
@@ -33,30 +33,6 @@ void EEG::connect() {
 void EEG::disconnect() {
     client.sockDisconnect();
     connected = false;
-}
-
-void EEG::startStream() {
-    //Prepare START_STREAM command
-    EEGProt::SendCommand pb;
-    pb.set_command(EEGProt::Command::COMMAND_START_STREAM);
-    std::string data;
-    pb.SerializeToString(&data);
-
-    //Send START_STREAM command
-    client.sockSend(data);
-}
-
-void EEG::stopStream() {
-    //Prepare STOP_STREAM command
-    EEGProt::SendCommand pb;
-    pb.set_command(EEGProt::Command::COMMAND_STOP_STREAM);
-    std::string data;
-    pb.SerializeToString(&data);
-
-    //Send STOP_STREAM command
-    client.sockSend(data);
-
-    streaming = false;
 }
 
 void EEG::pollInitState() {
@@ -102,6 +78,30 @@ void EEG::setProfile(std::string profile) {
 
     //Send LOAD_PROFILE command
     client.sockSend(data);
+}
+
+void EEG::startStream() {
+    //Prepare START_STREAM command
+    EEGProt::SendCommand pb;
+    pb.set_command(EEGProt::Command::COMMAND_START_STREAM);
+    std::string data;
+    pb.SerializeToString(&data);
+
+    //Send START_STREAM command
+    client.sockSend(data);
+}
+
+void EEG::stopStream() {
+    //Prepare STOP_STREAM command
+    EEGProt::SendCommand pb;
+    pb.set_command(EEGProt::Command::COMMAND_STOP_STREAM);
+    std::string data;
+    pb.SerializeToString(&data);
+
+    //Send STOP_STREAM command
+    client.sockSend(data);
+
+    streaming = false;
 }
 
 void EEG::readDataStream() {

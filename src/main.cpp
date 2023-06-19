@@ -64,15 +64,15 @@ int main(int, char**) {
     }
 
     // Init Sensors
-    Shimmersensor shimmersensor;
-    EEG eeg;
-    Movinghead movinghead;
+    Shimmersensor shimmersensor("python");
+    EEG eeg("python");
+    Movinghead movinghead("python");
 
     // Init Webcam
     Webcam webcam(1280, 720);
 
     // Init GameLogic
-    GameLogic game(&shimmersensor, &webcam);
+    GameLogic game(&shimmersensor, &eeg, &movinghead, &webcam);
 
     // Initiate Vulkan and ImGui
     ImguiUI imgui(&game);
