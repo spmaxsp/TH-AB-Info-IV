@@ -23,12 +23,14 @@ set(SOURCE_FILES
 
     src/py_extention/websocket/SocketClient.cpp  ### socket client
 
-    src/py_extention/modules/ModuleTemplate/PyModule.cpp
+    src/py_extention/modules/ModuleTemplate/PyModule.cpp    ### py-modules
     src/py_extention/modules/Shimmersensor/Shimmersensor.cpp
+    src/py_extention/modules/EEG/EEG.cpp
     src/py_extention/modules/Movinghead/Movinghead.cpp
 
     src/py_extention/modules/ModuleTemplate/proto/PyModuleProt.pb.cc  ### protobuf
     src/py_extention/modules/Shimmersensor/proto/ShimmersensorProt.pb.cc
+    src/py_extention/modules/EEG/proto/EEGProt.pb.cc
     src/py_extention/modules/Movinghead/proto/MovingheadProt.pb.cc
 
     src/vulkan_base/vulkan_device.cpp       ### vulkan

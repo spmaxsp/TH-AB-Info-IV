@@ -29,6 +29,17 @@ def Handler(pkt: DataPacket) -> None:
     sensor.accel_ln_y = pkt[EChannelType.ACCEL_LN_Y]
     sensor.accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
 
+def ppg_to_heart_rate(ppg_signal, sampling_rate):
+    peaks = []
+    for i in range(1, len(ppg_signal)-1):
+        if ppg_signal[i] > ppg_signal[i-1] and ppg_signal[i] > ppg_signal[i+1]:
+            peaks.append(i)
+    
+    peak_times = [peak / sampling_rate for peak in peaks]
+    heart_rate = 60 / (peak_times[-1] - peak_times[0])  # Berechnung der Herzfrequenz in Schlägen pro Minute
+    
+    return heart_rate
+
 class Shimmersensor: 
     shim_dev = None
     accel_ln_x = 0

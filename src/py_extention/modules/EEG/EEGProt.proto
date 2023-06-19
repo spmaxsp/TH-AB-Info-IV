@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package EEGProt;
+
+enum Command {
+  COMMAND_NOOP = 0;
+  COMMAND_START_STREAM = 1;
+  COMMAND_STOP_STREAM = 2;
+  COMMAND_LOAD_PROFILE = 3;
+  COMMAND_GET_STATE = 4;
+}
+
+enum State {
+  STATE_IDLE = 0;
+  STATE_STREAMING = 1;
+  STATE_WAITING = 2;
+  STATE_READY = 3;
+}
+
+enum Type{
+  TYPE_NONE = 0;
+  TYPE_DATA = 1;
+  TYPE_STATE_ONLY = 2;
+}
+
+message DataPacket {
+  State state = 1;
+  string timestamp = 2;
+  string data = 3;
+  Type type = 4; 
+}
+
+message SendCommand {
+  Command command = 1;
+  optional string data = 2;
+}

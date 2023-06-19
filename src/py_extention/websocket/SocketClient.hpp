@@ -19,6 +19,7 @@ private:
     std::string host;
     int port;
     SOCKET sock = INVALID_SOCKET;
+    bool connected = false;
 
     int sockInit(void);
     int sockQuit(void);
@@ -34,4 +35,6 @@ public:
     int sockSend(const std::string& message);
     int sockRecv(std::string& message);
     int sockDisconnect(void);
+
+    bool isConnected();
 };

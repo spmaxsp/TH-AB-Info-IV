@@ -1,6 +1,6 @@
 #include "PyModule.hpp"
 
-PyModule::PyModule() : shell_exec("python -u", "scripts/PyModule.py", {}), client("127.0.0.1", 50007) {
+PyModule::PyModule() : shell_exec("python -u", "scripts/PyModule.py"), client("127.0.0.1", 50007) {
 }
 
 PyModule::~PyModule() {
@@ -8,7 +8,7 @@ PyModule::~PyModule() {
 }
 
 void PyModule::run() {
-    shell_exec.run();
+    shell_exec.run({});
 }
 
 void PyModule::stop() {

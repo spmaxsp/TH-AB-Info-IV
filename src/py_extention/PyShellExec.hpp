@@ -37,12 +37,12 @@ class PyShellExec {
         void generateCommand(std::string &command, std::string py_path, std::string py_script, std::vector<std::string> args);
         void readOutput();
     public:
-        PyShellExec(std::string py_path, std::string py_script, std::vector<std::string> args);
+        PyShellExec(std::string py_path, std::string py_script);
         ~PyShellExec();
 
-        bool run();
+        bool run(std::vector<std::string> args);
         bool stop();
 
-        //std::string getOutput();
+        std::string getOutput();
         bool isRunning();
 };
