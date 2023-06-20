@@ -140,40 +140,40 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 ### Reqired scripts
 set(SCRIPT_FILES
-    #src/py_extention/modules/ModuleTemplate/PyModule.py
-    #src/py_extention/modules/ModuleTemplate/proto/PyModuleProt_pb2.py
+    #${PROJECT_SOURCE_DIR}/src/py_extention/modules/ModuleTemplate/PyModule.py
+    #${PROJECT_SOURCE_DIR}/src/py_extention/modules/ModuleTemplate/proto/PyModuleProt_pb2.py
 
-    src/py_extention/modules/Shimmersensor/Shimmersensor.py
-    srcpy_extention/modules/Shimmersensor/proto/ShimmersensorProt_pb2.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/Shimmersensor/Shimmersensor.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/Shimmersensor/proto/ShimmersensorProt_pb2.py
 
-    src/py_extention/modules/EEG/EEG.py
-    src/py_extention/modules/EEG/cortex.py
-    src/py_extention/modules/EEG/proto/EEGProt_pb2.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/EEG/EEG.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/EEG/cortex.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/EEG/proto/EEGProt_pb2.py
 
-    src/py_extention/modules/Movinghead/Movinghead.py
-    src/py_extention/modules/Movinghead/proto/MovingheadProt_pb2.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/Movinghead/Movinghead.py
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/Movinghead/proto/MovingheadProt_pb2.py
 
-    src/kill_py.bat
-    src/kill_py.sh
+    ${PROJECT_SOURCE_DIR}/src/kill_python.bat
+    ${PROJECT_SOURCE_DIR}/src/kill_python.sh
 )
 
 ### Required dlls
-set(DLL_FILES
-    
-)
+#set(DLL_FILES
+#    
+#)
 
 
-### copy files
+### copy scripts
 add_custom_target(copy_py ALL
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PY_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SCRIPT_FILES} ${PROJECT_SOURCE_DIR}/bin/scripts
                     COMMENT "Copying Python files to bin directory" )
 
 add_dependencies(${PROJECT_NAME} copy_py)
 
 ### copy dlls
-add_custom_target(copy_dll ALL
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DLL_FILES} ${PROJECT_SOURCE_DIR}/bin
-                    COMMENT "Copying dlls to bin directory" )
-
-add_dependencies(${PROJECT_NAME} copy_dll)
+#add_custom_target(copy_dll ALL
+#                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DLL_FILES} ${PROJECT_SOURCE_DIR}/bin
+#                    COMMENT "Copying dlls to bin directory" )
+#
+#add_dependencies(${PROJECT_NAME} copy_dll)
 
