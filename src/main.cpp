@@ -45,6 +45,48 @@ bool handleEvents() {
 	return true;
 }
 
+struct splashscreen {
+    SDL_Surface* image;
+    SDL_Renderer* renderer;
+    SDL_Window* window;
+    SDL_Texture* texture;
+};
+
+splashscreen* splashscreen_init() {
+    LOG_INIT_CERR();
+    splashscreen* splash = new splashscreen;
+
+    // Initialize SDL
+    SDL_Init(SDL_INIT_VIDEO);
+
+    // Create an SDL window and renderer for the splash screen
+    splash->window = SDL_CreateWindow("Splash Screen", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 250, 250, 0);
+
+    // Remove window decorations (title bar, borders, etc.)
+    SDL_SetWindowBordered(splash->window, SDL_FALSE);
+
+    splash->renderer = SDL_CreateRenderer(splash->window, -1, SDL_RENDERER_ACCELERATED);
+
+    // Load the splash screen image as an SDL texture
+    splash->image = SDL_LoadBMP("./test.bmp");
+    splash->texture = SDL_CreateTextureFromSurface(splash->renderer, splash->image);
+
+    // Render the splash screen texture
+    SDL_RenderClear(splash->renderer);
+    SDL_RenderCopy(splash->renderer, splash->texture, NULL, NULL);
+    SDL_RenderPresent(splash->renderer);
+
+    return splash;
+}
+
+void splashscreen_destroy(splashscreen* splash) {
+    SDL_DestroyTexture(splash->texture);
+    SDL_DestroyRenderer(splash->renderer);
+    SDL_DestroyWindow(splash->window);
+    SDL_FreeSurface(splash->image);
+    delete splash;
+}
+
 int main(int, char**) {
     // Initiate logger (default name is 'log')
     LOG_INIT_CERR();
@@ -55,13 +97,16 @@ int main(int, char**) {
         return 1;
     }
 
-    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Hello World", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_HIDDEN);
+    SDL_Window* window = SDL_CreateWindow("Brainbodycomputerinterface", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
     if (window == nullptr) {
         log(LOG_ERROR) << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
         SDL_Quit();
         return 1;
     }
+
+    // Initiate splashscreen
+    splashscreen* splash = splashscreen_init();
 
     // Init Sensors
     Shimmersensor shimmersensor("python");
@@ -79,6 +124,11 @@ int main(int, char**) {
 
     VulkanEngine app;
     app.InitVulkan(window, &imgui);
+
+    // destroy splashscreen and show/maximize main window
+    splashscreen_destroy(splash);
+    SDL_ShowWindow(window);
+    SDL_MaximizeWindow(window);
 
     // run Main Loop
     while (handleEvents() && game.gstate.AppRunning) {
