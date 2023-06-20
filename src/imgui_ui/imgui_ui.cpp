@@ -385,6 +385,8 @@ void ImguiUI::pythonError() {
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
     ImGui::Text("The Game did not exit properly last time. This caused python instances to stay alive. Please close all python instances.");
     ImGui::PopStyleColor();
+    ImGui::Text("If you are not sure how to do this, press the button below to kill all python instances.");
+    ImGui::Text("Killing all python instances on your system is generally not a good idea, but in this case it is the easiest way to fix the problem.");
     ImGui::PopFont();
 
     // Draw buttons
@@ -516,12 +518,12 @@ void ImguiUI::settingsMenue() {
             int tmp_z = gameLogic->shimmersensor->get_Accel_z();
 
             ImGui::Text("Live data:");
-            ImGui::SliderInt("Accel X:", &tmp_x, 0, 3000, "%d");
-            ImGui::SliderInt("Accel X:", &tmp_y, 0, 3000, "%d");
-            ImGui::SliderInt("Accel X:", &tmp_z, 0, 3000, "%d");
+            ImGui::SliderInt("Accel X:", &tmp_x, 0, 4000, "%d");
+            ImGui::SliderInt("Accel Y:", &tmp_y, 0, 4000, "%d");
+            ImGui::SliderInt("Accel Z:", &tmp_z, 0, 4000, "%d");
 
             ImGui::Text("Python Log");
-            char shimmer_log[1000000];
+            char shimmer_log[RINGBUFFER_SIZE+1];
             strcpy(shimmer_log, gameLogic->shimmersensor->getLogs().c_str());
             ImGui::InputTextMultiline("Shimmer Python log", shimmer_log, IM_ARRAYSIZE(shimmer_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
@@ -586,7 +588,7 @@ void ImguiUI::settingsMenue() {
             }
 
             ImGui::Text("Python Log");
-            char eeg_log[500];
+            char eeg_log[RINGBUFFER_SIZE+1];
             strcpy(eeg_log, gameLogic->eeg->getLogs().c_str());
             ImGui::InputTextMultiline("EEG Python Log", eeg_log, IM_ARRAYSIZE(eeg_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
@@ -645,7 +647,7 @@ void ImguiUI::settingsMenue() {
             }
 
             ImGui::Text("Python Log");
-            char mh_log[500];
+            char mh_log[RINGBUFFER_SIZE+1];
             strcpy(mh_log, gameLogic->movinghead->getLogs().c_str());
             ImGui::InputTextMultiline("MH Python Log", mh_log, IM_ARRAYSIZE(mh_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 

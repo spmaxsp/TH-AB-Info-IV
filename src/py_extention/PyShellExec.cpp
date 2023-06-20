@@ -139,7 +139,20 @@ bool PyShellExec::stop(){
 }
 
 std::string PyShellExec::getOutput(){
-    return output;
+    char log_buffer[RINGBUFFER_SIZE + 1];
+    if (ringbuffer_len == RINGBUFFER_SIZE) {
+        memcpy(log_buffer, &ringbuffer[ringbuffer_end], RINGBUFFER_SIZE - ringbuffer_end);
+        memcpy(&log_buffer[RINGBUFFER_SIZE - ringbuffer_end], ringbuffer, ringbuffer_end);
+        log_buffer[RINGBUFFER_SIZE] = 0;
+    } 
+    else {
+        memcpy(log_buffer, ringbuffer, ringbuffer_len);
+        log_buffer[ringbuffer_len] = 0;
+    }
+    
+    std::cout << "\033[0;32m[PyShellExec]" << "[Buffer " << std::this_thread::get_id() << "]\033[0m " << ringbuffer << std::endl;
+
+    return std::string(log_buffer);
 }
 
 bool PyShellExec::isRunning(){
@@ -151,15 +164,37 @@ void PyShellExec::readOutput(){
 #ifdef _WIN32
     DWORD bytesRead;
     while (ReadFile(stdout_pipe, buffer, BUFSIZ, &bytesRead, NULL)) {
+        // check if process has terminated
         if (bytesRead == 0) {
             break;
         }
-        this->output = this->output + buffer;
+
+        // check if buffer is empty
         if (!((buffer[0] == '\r' || buffer[0] == '\n') && buffer[2] == 0)) {
             std::cout << "\033[0;32m[PyShellExec]" << "[Thread " << std::this_thread::get_id() << "]\033[0m " << buffer << std::endl;
         }
+
+        if (bytesRead >= (RINGBUFFER_SIZE - ringbuffer_end)) {
+            memcpy(&ringbuffer[ringbuffer_end], buffer, RINGBUFFER_SIZE - ringbuffer_end);
+            memcpy(ringbuffer, &buffer[RINGBUFFER_SIZE - ringbuffer_end], bytesRead - (RINGBUFFER_SIZE - ringbuffer_end));
+            ringbuffer_end = bytesRead - (RINGBUFFER_SIZE - ringbuffer_end);
+            ringbuffer_len = RINGBUFFER_SIZE;
+        }
+        else {
+            memcpy(&ringbuffer[ringbuffer_end], buffer, bytesRead);
+            ringbuffer_end += bytesRead;
+            ringbuffer_len += bytesRead;
+            if (ringbuffer_end >= RINGBUFFER_SIZE) {
+                ringbuffer_end = 0;
+            }
+            if (ringbuffer_len >= RINGBUFFER_SIZE) {
+                ringbuffer_len = RINGBUFFER_SIZE;
+            }
+        }
         memset(buffer, 0, BUFSIZ);
     }
+
+
 #else
     while (fgets(buffer, BUFSIZ, stdout_pipe) != nullptr) {
         if (strlen(buffer) > 0) {

@@ -14,6 +14,7 @@
 #include "py_extention/modules/Movinghead/Movinghead.hpp"
 
 #include <chrono>
+#include <cstdlib>
 
 
 class GameLogic {

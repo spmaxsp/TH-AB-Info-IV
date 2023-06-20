@@ -10,6 +10,8 @@
 #include <signal.h>
 #endif
 
+#define RINGBUFFER_SIZE 1000
+
 //#include <unistd.h>
 
 class PyShellExec {
@@ -33,7 +35,9 @@ class PyShellExec {
 
         std::thread output_thread;
 
-        std::string output;
+        int ringbuffer_len = 0;
+        int ringbuffer_end = 0;
+        char ringbuffer[RINGBUFFER_SIZE];
 
         void generateCommand(std::string &command, std::string py_path, std::string py_script, std::vector<std::string> args);
         void readOutput();
