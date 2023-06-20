@@ -154,7 +154,12 @@ void GameLogic::testPythonPath(){
 }
 
 void GameLogic::killPythonProcesses(){
-
+#ifdef _WIN32
+    system(".\\scripts\\kill_python.bat");
+#else
+    system("chmod +x ./scripts/kill_python.sh");
+    system("./scripts/kill_python.sh");
+#endif
 }
 
 void GameLogic::QuitApp(){
