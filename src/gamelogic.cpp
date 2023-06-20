@@ -78,6 +78,52 @@ void GameLogic::updateGame(){
         return;
     }
 
+    if (this->dstate.show_pause) {
+        return;
+    }
+
+    
+    // Move Head
+    const std::chrono::duration<double> movementInterval(0.2);
+    if (std::chrono::steady_clock::now() >= movement_fence){
+        if (this->shimmersensor->get_Accel_x() > 2200) {
+            if (this->settingsManager.global.virtual_head){
+                this->gstate.CurrentPosX = this->gstate.CurrentPosX + 50;
+            }
+            else {
+                this->movinghead->move_up();
+            }
+        }
+        if (this->shimmersensor->get_Accel_x() < 1800) {
+            if (this->settingsManager.global.virtual_head){
+                this->gstate.CurrentPosX = this->gstate.CurrentPosX - 50;
+            }
+            else {
+                this->movinghead->move_down();
+            }
+        }
+
+        if (this->shimmersensor->get_Accel_y() > 2200) {
+            if (this->settingsManager.global.virtual_head){
+                this->gstate.CurrentPosY = this->gstate.CurrentPosY + 50;
+            }
+            else {
+                this->movinghead->move_left();
+            }
+        }
+        if (this->shimmersensor->get_Accel_y() < 1800) {
+            if (this->settingsManager.global.virtual_head){
+                this->gstate.CurrentPosY = this->gstate.CurrentPosY - 50;
+            }
+            else {
+                this->movinghead->move_right();
+            }
+        }
+        auto movementDuration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(movementInterval);
+        movement_fence += movementDuration;
+    }
+
+
     // Compute time left
     auto current_time = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = current_time - this->start_time;
@@ -151,4 +197,21 @@ void GameLogic::endGame(){
     this->gstate.GameRunning = false;
     this->dstate.show_pause = false;
     this->dstate.show_main_menue = true;
+}
+
+void GameLogic::updateSensors(){
+    const std::chrono::duration<double> executionInterval(1.0/this->settingsManager.shimmer.pollrate);
+
+    if (this->shimmersensor->getConnectedState()) {
+        if (!this->shimmersensor->getStreamingState()) {
+            this->shimmersensor->startStream();
+            shimmer_polling_fence = std::chrono::steady_clock::now();
+        }
+        if (std::chrono::steady_clock::now() >= shimmer_polling_fence){
+            this->shimmersensor->readDataStream();
+            
+            auto executionDuration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(executionInterval);
+            shimmer_polling_fence += executionDuration;
+        }
+    }
 }
