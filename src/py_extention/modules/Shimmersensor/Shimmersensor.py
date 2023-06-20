@@ -24,14 +24,13 @@ HOST = sys.argv[2]
 
 RATE = sys.argv[3]
 
-COM = sys.argv[4]
 
-global streaming
-streaming = False
+
+COM = sys.argv[4]
 
 def Handler(pkt: DataPacket) -> None:
     global sensor
-    #print("sensor data...")
+    #print(pkt[EChannelType.ACCEL_LN_X])
     sensor.accel_ln_x = pkt[EChannelType.ACCEL_LN_X]
     sensor.accel_ln_y = pkt[EChannelType.ACCEL_LN_Y]
     sensor.accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
@@ -80,20 +79,18 @@ class Shimmersensor:
         shim_dev.stop_streaming()
         shim_dev.shutdown()
 
-streaming = False
-sensor = Shimmersensor()
-
 async def handle_client(reader, writer):
     global sensor
     addr = writer.get_extra_info('peername')
     print(f"New client connected: {addr}")
     
     async def send_data():
+        print('start sending')
         global streaming
         global sensor 
         while True:
             if streaming:
-                #print("Sending data...")
+                #print(f"Sending data: x={sensor.accel_ln_x}, y={sensor.accel_ln_y}, z={sensor.accel_ln_z}")
                 pb = proto.DataPacket()
                 pb.state = proto.State.STATE_STREAMING
                 now = datetime.now()
@@ -108,7 +105,7 @@ async def handle_client(reader, writer):
                 except ConnectionResetError:
                     print(f"Client {addr} disconnected")
                     break
-            await asyncio.sleep(1/RATE)
+            await asyncio.sleep(1 / int(RATE))
 
     async def receive_data():
         global streaming
@@ -151,5 +148,10 @@ async def main():
     async with server:
         print("Server running on port " + str(PORT))
         await server.serve_forever()
+
+global streaming
+streaming = False
+global sensor
+sensor = Shimmersensor()
 
 asyncio.run(main())

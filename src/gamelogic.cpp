@@ -62,9 +62,14 @@ void GameLogic::startGame(){
     else { time_to_reach_target = 90; }
 
     this->start_time = std::chrono::steady_clock::now();
+
+    this->movement_fence = std::chrono::steady_clock::now();
 }
 
 void GameLogic::updateGame(){
+
+    // Update sensors
+    this->updateSensors();
 
     // Update webcam
     this->webcam->getImage();
@@ -109,6 +114,18 @@ void GameLogic::killPythonProcesses(){
 void GameLogic::QuitApp(){
 
     // Exit python
+    if (this->shimmersensor->getRunningState()) {
+        this->shimmersensor->disconnect();
+        this->shimmersensor->stop();
+    }
+    if (this->eeg->getRunningState()) {
+        this->eeg->disconnect();
+        this->eeg->stop();
+    }
+    if (this->movinghead->getRunningState()) {
+        this->movinghead->disconnect();
+        this->movinghead->stop();
+    }
     this->settingsManager.python.clean_exit_flag = true;
 
     // Save settings

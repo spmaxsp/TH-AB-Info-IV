@@ -67,6 +67,7 @@ bool PyShellExec::run(std::vector<std::string> args){
     }
     CloseHandle(outPipeWrite);
     handle = piProcInfo.hProcess;
+    pid = piProcInfo.dwProcessId;
     stdout_pipe = outPipeRead;
 #else
     int out_pipe[2];
@@ -97,15 +98,34 @@ bool PyShellExec::run(std::vector<std::string> args){
 
 bool PyShellExec::stop(){
 #ifdef _WIN32
-    if (TerminateProcess(handle, 0)) {
-        CloseHandle(handle);
-    } 
+    HANDLE hHandle;
+    DWORD dwExitCode = 0;
+    hHandle = ::OpenProcess(PROCESS_ALL_ACCESS,0,pid);
+
+    ::GetExitCodeProcess(hHandle,&dwExitCode);
+    if (::TerminateProcess(hHandle,dwExitCode)){
+        ::WaitForSingleObject(hHandle,INFINITE);
+        ::CloseHandle(hHandle);
+        CloseHandle(stdout_pipe);
+        output_thread.join();
+        running = false;
+        return true;
+    }
+
+
+    //GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid);
+    //if (TerminateProcess(handle, 0)) {
+    //    WaitForSingleObject(handle, INFINITE);
+    //    CloseHandle(handle);
+    //    CloseHandle(stdout_pipe);
+    //    running = false;
+    //    return true;
+    //} 
     else {
         std::cerr << "Error: could not kill process" << std::endl;
+        return false;
     }
-    CloseHandle(stdout_pipe);
-    //output_thread.join();
-    return true;
+
 #else
     if (kill(pid, SIGTERM) == 0) {
     } 
@@ -113,7 +133,7 @@ bool PyShellExec::stop(){
         std::cerr << "Error: could not kill process" << std::endl;
     }
     fclose(stdout_pipe);
-    //output_thread.join();
+    output_thread.join();
     return true;
 #endif
 }

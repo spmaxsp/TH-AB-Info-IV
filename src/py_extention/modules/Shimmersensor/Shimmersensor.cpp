@@ -46,6 +46,8 @@ void Shimmersensor::startStream() {
     log(LOG_INFO) << "Sending data (raw): " << dbg;
 
     client.sockSend(data);
+
+    streaming = true;
 }
 
 void Shimmersensor::stopStream() {

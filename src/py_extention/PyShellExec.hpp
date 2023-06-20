@@ -22,6 +22,7 @@ class PyShellExec {
 
 #ifdef _WIN32
         HANDLE handle;
+        int pid;
         HANDLE stdout_pipe;  
         HANDLE stderr_pipe;   
 #else

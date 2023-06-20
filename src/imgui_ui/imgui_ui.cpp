@@ -475,6 +475,7 @@ void ImguiUI::settingsMenue() {
             ImGui::SameLine();
             if (ImGui::Button("Stop", ImVec2(100, 50))) {
                 if (gameLogic->shimmersensor->getRunningState()){
+                    gameLogic->shimmersensor->disconnect();
                     gameLogic->shimmersensor->stop();
                 }
             }
@@ -510,8 +511,17 @@ void ImguiUI::settingsMenue() {
                 ImGui::PopStyleColor();
             }
 
+            int tmp_x = gameLogic->shimmersensor->get_Accel_x();
+            int tmp_y = gameLogic->shimmersensor->get_Accel_y();
+            int tmp_z = gameLogic->shimmersensor->get_Accel_z();
+
+            ImGui::Text("Live data:");
+            ImGui::SliderInt("Accel X:", &tmp_x, 0, 3000, "%d");
+            ImGui::SliderInt("Accel X:", &tmp_y, 0, 3000, "%d");
+            ImGui::SliderInt("Accel X:", &tmp_z, 0, 3000, "%d");
+
             ImGui::Text("Python Log");
-            char shimmer_log[500];
+            char shimmer_log[1000000];
             strcpy(shimmer_log, gameLogic->shimmersensor->getLogs().c_str());
             ImGui::InputTextMultiline("Shimmer Python log", shimmer_log, IM_ARRAYSIZE(shimmer_log), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 16), ImGuiInputTextFlags_ReadOnly);
 
@@ -539,6 +549,7 @@ void ImguiUI::settingsMenue() {
             ImGui::SameLine();
             if (ImGui::Button("Stop", ImVec2(100, 50))) {
                 if (gameLogic->eeg->getRunningState()){
+                    gameLogic->eeg->disconnect();
                     gameLogic->eeg->stop();
                 }
             }
@@ -597,6 +608,7 @@ void ImguiUI::settingsMenue() {
             ImGui::SameLine();
             if (ImGui::Button("Stop", ImVec2(100, 50))) {
                 if (gameLogic->movinghead->getRunningState()){
+                    gameLogic->movinghead->disconnect();
                     gameLogic->movinghead->stop();
                 }
             }

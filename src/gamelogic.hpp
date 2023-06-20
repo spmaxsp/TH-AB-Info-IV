@@ -43,9 +43,15 @@ class GameLogic {
     private:
         std::chrono::steady_clock::time_point start_time;
 
+        std::chrono::steady_clock::time_point movement_fence;
+        
+        std::chrono::steady_clock::time_point shimmer_polling_fence;
+
         int time_to_reach_target = 0;
 
         void setNewTargetPosition();
+
+        void updateSensors();
 
 };
     
