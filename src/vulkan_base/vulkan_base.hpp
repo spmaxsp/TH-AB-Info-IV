@@ -30,8 +30,6 @@
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
-#define _DEBUG
-
 struct VulkanQueue {
     VkQueue queue;
     uint32_t familyIndex;
