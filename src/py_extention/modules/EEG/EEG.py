@@ -71,17 +71,11 @@ class EEG:
     def on_query_profile_done(self, *args, **kwargs):
         print('on_query_profile_done')
         self.profile_list = kwargs.get('data')
-        print("-------------------------------------------------------------------------------------------------")
-        print(self.profile_list)
-        print("-------------------------------------------------------------------------------------------------")
         self.profiles_ready = True
 
     def on_new_com_data(self, *args, **kwargs):
         data = kwargs.get('data')
-        mental_command = data["action"]
-        print("-------------------------------------------------------------------------------------------------")
-        print(mental_command)
-        print("-------------------------------------------------------------------------------------------------")
+        self.mental_command = data["action"]
 
     def on_inform_error(self, *args, **kwargs):
         error_data = kwargs.get('error_data')
@@ -121,6 +115,7 @@ async def handle_client(reader, writer):
             if streaming:
                 #print("Sending data...")
                 pb = proto.DataPacket()
+                pb.type = proto.Type.TYPE_DATA
                 pb.state = proto.State.STATE_STREAMING
                 pb.data = sensor.mental_command
                 now = datetime.now()
