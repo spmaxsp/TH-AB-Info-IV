@@ -54,13 +54,22 @@ struct splashscreen {
 
 splashscreen* splashscreen_init() {
     LOG_INIT_CERR();
+
+    #ifdef _DEBUG
+        log.set_log_level(LOG_DEBUG);
+        log(LOG_DEBUG) << "THIS IS A DEBUG BUILD" << "\n";
+    #else
+        log.set_log_level(LOG_INFO);
+    #endif
+
+
     splashscreen* splash = new splashscreen;
 
     // Initialize SDL
     SDL_Init(SDL_INIT_VIDEO);
 
     // Create an SDL window and renderer for the splash screen
-    splash->window = SDL_CreateWindow("Splash Screen", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 250, 250, 0);
+    splash->window = SDL_CreateWindow("Splash Screen", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 500, 700, 0);
 
     // Remove window decorations (title bar, borders, etc.)
     SDL_SetWindowBordered(splash->window, SDL_FALSE);
@@ -68,7 +77,7 @@ splashscreen* splashscreen_init() {
     splash->renderer = SDL_CreateRenderer(splash->window, -1, SDL_RENDERER_ACCELERATED);
 
     // Load the splash screen image as an SDL texture
-    splash->image = SDL_LoadBMP("./test.bmp");
+    splash->image = SDL_LoadBMP("./assets/splash-bbci.bmp");
     splash->texture = SDL_CreateTextureFromSurface(splash->renderer, splash->image);
 
     // Render the splash screen texture

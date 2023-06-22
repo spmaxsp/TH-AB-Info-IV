@@ -139,11 +139,11 @@ void ImguiUI::loadStyle() {
     ImGuiIO& io = ImGui::GetIO();
 
     ImFontAtlas* fontAtlas = io.Fonts;
-    ImFont* std_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\micross.ttf"), 20);
-    ImFont* fancy_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\OCRAEXT.TTF"), 30);
-    ImFont* big_timer_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\impact.ttf"), 60);
-    ImFont* small_timer_font = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\impact.ttf"), 30);
-    ImFont* fancy_font_huge = fontAtlas->AddFontFromFileTTF(("C:\\Windows\\Fonts\\OCRAEXT.TTF"), 60);
+    ImFont* std_font = fontAtlas->AddFontFromFileTTF(("./assets/neuropol.otf"), 20);
+    ImFont* fancy_font = fontAtlas->AddFontFromFileTTF(("./assets/Guantum.otf"), 50);
+    ImFont* big_timer_font = fontAtlas->AddFontFromFileTTF(("./assets/bigmacca.ttf"), 50);
+    ImFont* small_timer_font = fontAtlas->AddFontFromFileTTF(("./assets/bigmacca.ttf"), 30);
+    ImFont* fancy_font_huge = fontAtlas->AddFontFromFileTTF(("./assets/Guantum.otf"), 65);
 
     fontAtlas->Build();
 }
