@@ -25,7 +25,7 @@ struct ShimmerSettings {
 
 struct EegSettings {
     char user_id[100];
-    char token[100];
+    char token[300];
     int pollrate;
 };
 

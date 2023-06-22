@@ -278,19 +278,19 @@ void ImguiUI::mainGame() {
             // Draw D-Pad
             ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 150, io.DisplaySize.y - 200));
             if (ImGui::Button("Up", ImVec2(50, 50))) {
-                gameLogic->gstate.CurrentPosY -= 50;
+                gameLogic->manual_move = MOVE_UP;
             }
             ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 200, io.DisplaySize.y - 150));
             if (ImGui::Button("Left", ImVec2(50, 50))) {
-                gameLogic->gstate.CurrentPosX -= 50;
+                gameLogic->manual_move = MOVE_LEFT;
             }
             ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 100, io.DisplaySize.y - 150));
             if (ImGui::Button("Right", ImVec2(50, 50))) {
-                gameLogic->gstate.CurrentPosX += 50;
+                gameLogic->manual_move = MOVE_RIGHT;
             }
             ImGui::SetCursorPos(ImVec2(io.DisplaySize.x - 150, io.DisplaySize.y-100));
             if (ImGui::Button("Down", ImVec2(50, 50))) {
-                gameLogic->gstate.CurrentPosY += 50;
+                gameLogic->manual_move = MOVE_DOWN;
             }
         }
     }
@@ -374,7 +374,7 @@ void ImguiUI::pythonError() {
 
     // Set window size and position
     ImVec2 center = ImVec2(io.DisplaySize.x * 0.5, io.DisplaySize.y * 0.5);
-    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.8, io.DisplaySize.y * 0.3);
+    ImVec2 windowSize = ImVec2(io.DisplaySize.x * 0.8, io.DisplaySize.y * 0.4);
     ImVec2 windowPos = ImVec2(center.x - windowSize.x * 0.5, center.y - windowSize.y * 0.5);
     ImGui::SetNextWindowPos(windowPos);
     ImGui::SetNextWindowSize(windowSize);
@@ -383,10 +383,10 @@ void ImguiUI::pythonError() {
     // Draw error message
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
-    ImGui::Text("The Game did not exit properly last time. This caused python instances to stay alive. Please close all python instances.");
+    ImGui::Text("The Game did not exit properly last time. This caused python instances to stay alive. \n Please close all python instances.");
     ImGui::PopStyleColor();
     ImGui::Text("If you are not sure how to do this, press the button below to kill all python instances.");
-    ImGui::Text("Killing all python instances on your system is generally not a good idea, but in this case it is the easiest way to fix the problem.");
+    ImGui::Text("Killing all python instances on your system is generally not a good idea, \n but in this case it is the easiest way to fix the problem.");
     ImGui::PopFont();
 
     // Draw buttons
@@ -435,6 +435,8 @@ void ImguiUI::settingsMenue() {
             const char* time[] = { "30s", "60s", "90s" };
             ImGui::Combo("Time", &gameLogic->settingsManager.global.time, time, IM_ARRAYSIZE(time));
 
+            ImGui::Separator();
+
             ImGui::Text("Testing");
             ImGui::Checkbox("Virtual MovingHead", &gameLogic->settingsManager.global.virtual_head);
 
@@ -445,11 +447,6 @@ void ImguiUI::settingsMenue() {
         {
             ImGui::Text("Python Path");
             ImGui::InputText("PythonPath", gameLogic->settingsManager.python.path, IM_ARRAYSIZE(gameLogic->settingsManager.python.path));
-
-            ImGui::Text("Test Python Path");
-            if (ImGui::Button("Test", ImVec2(100, 50))){
-                gameLogic->testPythonPath();
-            }
 
             ImGui::Text("Python Kill Processes");
             if (ImGui::Button("Kill", ImVec2(100, 50))){
@@ -468,6 +465,8 @@ void ImguiUI::settingsMenue() {
 
             ImGui::Text("Polling Rate");
             ImGui::SliderInt("Shimmer Polling Rate", &gameLogic->settingsManager.shimmer.pollrate, 1, 30, "%d Hz");
+
+            ImGui::Separator();
 
             if (ImGui::Button("Start", ImVec2(100, 50))) {
                 if (!gameLogic->shimmersensor->getRunningState()){
@@ -494,7 +493,10 @@ void ImguiUI::settingsMenue() {
                 }
             }
 
-            ImGui::Text("Sensor Status");
+            ImGui::Separator();
+
+            ImGui::Text("Python Module Status");
+            ImGui::SameLine();
             if (gameLogic->shimmersensor->getRunningState()){
                 if (gameLogic->shimmersensor->getConnectedState()){
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
@@ -513,6 +515,26 @@ void ImguiUI::settingsMenue() {
                 ImGui::PopStyleColor();
             }
 
+            ImGui::Text("Sensor Stream");
+            ImGui::SameLine();
+            if (gameLogic->shimmersensor->getStreamEnabled()){
+                if (gameLogic->shimmersensor->getStreamingState()){
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+                    ImGui::Text("Streaming");
+                    ImGui::PopStyleColor();
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                    ImGui::Text("Waiting for Stream");
+                    ImGui::PopStyleColor();
+                }
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+                ImGui::Text("Disabled");
+                ImGui::PopStyleColor();
+            }
+
             int tmp_x = gameLogic->shimmersensor->get_Accel_x();
             int tmp_y = gameLogic->shimmersensor->get_Accel_y();
             int tmp_z = gameLogic->shimmersensor->get_Accel_z();
@@ -521,6 +543,8 @@ void ImguiUI::settingsMenue() {
             ImGui::SliderInt("Accel X:", &tmp_x, 0, 4000, "%d");
             ImGui::SliderInt("Accel Y:", &tmp_y, 0, 4000, "%d");
             ImGui::SliderInt("Accel Z:", &tmp_z, 0, 4000, "%d");
+
+            ImGui::Separator();
 
             ImGui::Text("Python Log");
             char shimmer_log[RINGBUFFER_SIZE+1];
@@ -542,6 +566,8 @@ void ImguiUI::settingsMenue() {
 
             ImGui::Text("Polling Rate");
             ImGui::SliderInt("EEG Polling Rate", &gameLogic->settingsManager.eeg.pollrate, 1, 30, "%d Hz");
+
+            ImGui::Separator();
 
             if (ImGui::Button("Start", ImVec2(100, 50))) {
                 if (!gameLogic->eeg->getRunningState()){
@@ -568,7 +594,38 @@ void ImguiUI::settingsMenue() {
                 }
             }
 
-            ImGui::Text("Sensor Status");
+            ImGui::Separator();
+
+            ImGui::Text("Profile");
+            if (gameLogic->eeg->getInitState()){
+                std::vector<const char*> profile_list = gameLogic->eeg->getProfiles();
+                ImGui::BeginCombo("Profile", gameLogic->eeg->profile);
+                for (int n = 0; n < profile_list.size(); n++)
+                {
+                    bool is_selected = (gameLogic->eeg->profile == profile_list[n]);
+                    if (ImGui::Selectable(profile_list[n], is_selected)){
+                        strcpy(gameLogic->eeg->profile, profile_list[n]);
+                    }
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            else {
+                ImGui::Text("Waiting for Profile list");
+            }
+
+            if (ImGui::Button("SetProfile", ImVec2(100, 50))) {
+                if (gameLogic->eeg->getInitState()){
+                    gameLogic->eeg->setProfile("tillNeu");
+                    gameLogic->eeg->startStream();
+                }
+            }
+
+            ImGui::Separator();
+
+            ImGui::Text("Python Module Status");
+            ImGui::SameLine();
             if (gameLogic->eeg->getRunningState()){
                 if (gameLogic->eeg->getConnectedState()){
                     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
@@ -587,6 +644,46 @@ void ImguiUI::settingsMenue() {
                 ImGui::PopStyleColor();
             }
 
+            ImGui::Text("Sensor State");
+            ImGui::SameLine();
+            if (!gameLogic->eeg->getInitState()){
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+                ImGui::Text("Waiting");
+                ImGui::PopStyleColor();
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+                ImGui::Text("Initialized");
+                ImGui::PopStyleColor();
+            }
+
+            ImGui::Text("Sensor Stream");
+            ImGui::SameLine();
+            if (gameLogic->eeg->getStreamEnabled()){
+                if (gameLogic->eeg->getStreamingState()){
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 1, 0, 1));
+                    ImGui::Text("Streaming");
+                    ImGui::PopStyleColor();
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                    ImGui::Text("Waiting for Stream");
+                    ImGui::PopStyleColor();
+                }
+            }
+            else {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 1, 1));
+                ImGui::Text("Disabled");
+                ImGui::PopStyleColor();
+            }
+
+            char mental_command_state[50];
+            strcpy(mental_command_state, gameLogic->eeg->getLatestDataPacket().c_str());
+            ImGui::Text("Mental Command");
+            ImGui::SameLine();
+            ImGui::Text(mental_command_state);
+
+
             ImGui::Text("Python Log");
             char eeg_log[RINGBUFFER_SIZE+1];
             strcpy(eeg_log, gameLogic->eeg->getLogs().c_str());
@@ -601,6 +698,8 @@ void ImguiUI::settingsMenue() {
 
             ImGui::Text("StepSize");
             ImGui::SliderInt("MH Step Size", &gameLogic->settingsManager.head.step_size, 1, 30, "%d deg");
+
+            ImGui::Separator();
 
             if (ImGui::Button("Start", ImVec2(100, 50))) {
                 if (!gameLogic->movinghead->getRunningState()){
@@ -626,6 +725,8 @@ void ImguiUI::settingsMenue() {
                     gameLogic->movinghead->disconnect();
                 }
             }
+
+            ImGui::Separator();
         
             ImGui::Text("Sensor Status");
             if (gameLogic->movinghead->getRunningState()){

@@ -39,8 +39,8 @@ GameLogic::GameLogic(Shimmersensor* shimmersensor, EEG* eeg, Movinghead* movingh
 }
 
 void GameLogic::setNewTargetPosition(){
-    this->gstate.TargetPosX = rand() % 1000;
-    this->gstate.TargetPosY = rand() % 1000;
+    this->gstate.TargetPosX = rand() % 800 + 100;
+    this->gstate.TargetPosY = rand() % 800 + 100;
 }
 
 void GameLogic::startGame(){
@@ -66,6 +66,66 @@ void GameLogic::startGame(){
     this->movement_fence = std::chrono::steady_clock::now();
 }
 
+void GameLogic::makeMovement(int movement) {
+    if (this->settingsManager.global.virtual_head) {
+        if (movement == MOVE_UP) {
+            this->gstate.CurrentPosY = this->gstate.CurrentPosY - 50;
+        }
+        else if (movement == MOVE_DOWN) {
+            this->gstate.CurrentPosY = this->gstate.CurrentPosY + 50;
+        }
+        else if (movement == MOVE_LEFT) {
+            this->gstate.CurrentPosX = this->gstate.CurrentPosX - 50;
+        }
+        else if (movement == MOVE_RIGHT) {
+            this->gstate.CurrentPosX = this->gstate.CurrentPosX + 50;
+        }
+    }
+    else {
+        if (movement == MOVE_UP) {
+            this->movinghead->move_up();
+        }
+        else if (movement == MOVE_DOWN) {
+            this->movinghead->move_down();
+        }
+        else if (movement == MOVE_LEFT) {
+            this->movinghead->move_left();
+        }
+        else if (movement == MOVE_RIGHT) {
+            this->movinghead->move_right();
+        }
+    }
+}
+
+int GameLogic::determineMovement() {
+    if (this->settingsManager.global.sensor == SENSOR_EEG) {
+
+    }
+    else if (this->settingsManager.global.sensor == SENSOR_VIRTUAL) {
+        int movement = this->manual_move;
+        this->manual_move = MOVE_NONE;
+        return movement;
+    }
+    else if (this->settingsManager.global.sensor == SENSOR_SHIMMER) {
+        if (this->shimmersensor->get_Accel_x() > 2200) {
+            return MOVE_UP;
+        }
+        if (this->shimmersensor->get_Accel_x() < 1800) {
+            return MOVE_DOWN;
+        }
+
+        if (this->shimmersensor->get_Accel_y() > 2200) {
+            return MOVE_LEFT;
+        }
+        if (this->shimmersensor->get_Accel_y() < 1800) {
+            return MOVE_RIGHT;
+        }
+        else {
+            return MOVE_NONE;
+        }
+    }
+}
+
 void GameLogic::updateGame(){
 
     // Update sensors
@@ -85,40 +145,9 @@ void GameLogic::updateGame(){
     
     // Move Head
     const std::chrono::duration<double> movementInterval(0.2);
-    if (std::chrono::steady_clock::now() >= movement_fence){
-        if (this->shimmersensor->get_Accel_x() > 2200) {
-            if (this->settingsManager.global.virtual_head){
-                this->gstate.CurrentPosX = this->gstate.CurrentPosX + 50;
-            }
-            else {
-                this->movinghead->move_up();
-            }
-        }
-        if (this->shimmersensor->get_Accel_x() < 1800) {
-            if (this->settingsManager.global.virtual_head){
-                this->gstate.CurrentPosX = this->gstate.CurrentPosX - 50;
-            }
-            else {
-                this->movinghead->move_down();
-            }
-        }
-
-        if (this->shimmersensor->get_Accel_y() > 2200) {
-            if (this->settingsManager.global.virtual_head){
-                this->gstate.CurrentPosY = this->gstate.CurrentPosY + 50;
-            }
-            else {
-                this->movinghead->move_left();
-            }
-        }
-        if (this->shimmersensor->get_Accel_y() < 1800) {
-            if (this->settingsManager.global.virtual_head){
-                this->gstate.CurrentPosY = this->gstate.CurrentPosY - 50;
-            }
-            else {
-                this->movinghead->move_right();
-            }
-        }
+    if (std::chrono::steady_clock::now() > movement_fence) {
+        int movement = this->determineMovement();
+        this->makeMovement(movement);
         auto movementDuration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(movementInterval);
         movement_fence += movementDuration;
     }
@@ -208,7 +237,7 @@ void GameLogic::updateSensors(){
     const std::chrono::duration<double> executionInterval(1.0/this->settingsManager.shimmer.pollrate);
 
     if (this->shimmersensor->getConnectedState()) {
-        if (!this->shimmersensor->getStreamingState()) {
+        if (!this->shimmersensor->getStreamEnabled()) {
             this->shimmersensor->startStream();
             shimmer_polling_fence = std::chrono::steady_clock::now();
         }
@@ -219,4 +248,21 @@ void GameLogic::updateSensors(){
             shimmer_polling_fence += executionDuration;
         }
     }
+
+    if (std::chrono::steady_clock::now() >= eeg_polling_fence){
+        if (this->eeg->getConnectedState()) {
+            if (!this->eeg->getInitState()){
+                this->eeg->pollInitState();
+            }
+            shimmer_polling_fence = std::chrono::steady_clock::now();
+        }
+
+        if (this->eeg->getStreamEnabled()) {
+                this->eeg->readDataStream();
+        }
+        auto executionDuration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(executionInterval);
+        eeg_polling_fence += executionDuration;
+    }
+
+
 }

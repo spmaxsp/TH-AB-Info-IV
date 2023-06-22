@@ -23,16 +23,21 @@ void EEG::stop() {
     shell_exec.stop();
     connected = false;
     streaming = false;
+    stream_enabled = false;
 }
 
 void EEG::connect() {
     client.sockConnect();
     connected = true;
+    streaming = false;
+    stream_enabled = false;
 }
 
 void EEG::disconnect() {
     client.sockDisconnect();
     connected = false;
+    streaming = false;
+    stream_enabled = false;
 }
 
 void EEG::pollInitState() {
@@ -59,10 +64,11 @@ void EEG::pollInitState() {
         }
         else if (state == EEGProt::State::STATE_READY) {
             state_ready = true;
-            std::stringstream profile_sstr(pb.data());
-            std::string item;
-            while(std::getline(profile_sstr, item, ',')) {
-                profiles.push_back(item);
+            std::string profiles_str = pb.data();
+            std::istringstream profiles_sstr(profiles_str);
+            std::string profile;
+            while (std::getline(profiles_sstr, profile, ',')) {
+                profiles.push_back(profile);
             }
         }
     }
@@ -89,6 +95,8 @@ void EEG::startStream() {
 
     //Send START_STREAM command
     client.sockSend(data);
+
+    stream_enabled = true;
 }
 
 void EEG::stopStream() {
@@ -102,6 +110,7 @@ void EEG::stopStream() {
     client.sockSend(data);
 
     streaming = false;
+    stream_enabled = false;
 }
 
 void EEG::readDataStream() {
@@ -117,6 +126,7 @@ void EEG::readDataStream() {
         int streaming = pb.state();
         if (streaming == EEGProt::State::STATE_STREAMING) {
             this->streaming = true;
+            latest_data_packet = mentalcommand;
         }
         else {
             this->streaming = false;
@@ -144,10 +154,18 @@ bool EEG::getStreamingState() {
     return streaming;
 }
 
+bool EEG::getStreamEnabled() {
+    return stream_enabled;
+}
+
 std::string EEG::getLatestDataPacket() {
     return latest_data_packet;
 }
 
-std::vector<std::string> EEG::getProfiles() {
-    return profiles;
+std::vector<const char*> EEG::getProfiles() {
+    std::vector<const char*> profiles_cstr;
+    for (auto& profile : profiles) {
+        profiles_cstr.push_back(profile.c_str());
+    }
+    return profiles_cstr;
 }

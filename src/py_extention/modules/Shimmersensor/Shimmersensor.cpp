@@ -21,17 +21,22 @@ void Shimmersensor::run(int polling_rate, std::string port) {
 void Shimmersensor::stop() {
     shell_exec.stop();
     connected = false;
-    streaming = false;
+    streaming = false; 
+    stream_enabled = false;
 }
 
 void Shimmersensor::connect() {
     client.sockConnect();
     connected = true;
+    streaming = false; 
+    stream_enabled = false;
 }
 
 void Shimmersensor::disconnect() {
     client.sockDisconnect();
     connected = false;
+    streaming = false; 
+    stream_enabled = false;
 }
 
 void Shimmersensor::startStream() {
@@ -47,7 +52,8 @@ void Shimmersensor::startStream() {
 
     client.sockSend(data);
 
-    streaming = true;
+    stream_enabled = true;
+    streaming = false;
 }
 
 void Shimmersensor::stopStream() {
@@ -58,6 +64,7 @@ void Shimmersensor::stopStream() {
     client.sockSend(data);
 
     streaming = false;
+    stream_enabled = false;
 }
 
 void Shimmersensor::readDataStream() {
@@ -67,6 +74,7 @@ void Shimmersensor::readDataStream() {
     int state = client.sockRecv(data);
     if (state <= 0) {
         log(LOG_ERROR) << "Error reading data with state: " << state << "\n";
+        streaming = false; 
     }
     else {
         ShimmersensorProt::DataPacket pb;
@@ -77,6 +85,9 @@ void Shimmersensor::readDataStream() {
 
         if (pb.state() == ShimmersensorProt::State::STATE_STREAMING){
             streaming = true; 
+        }
+        else {
+            streaming = false; 
         }
         log(LOG_INFO) << "Data:  (x):" << accel_ln_x << "  (y):" << accel_ln_y << "  (z):" << accel_ln_x << "\n";
     }
@@ -96,6 +107,10 @@ bool Shimmersensor::getConnectedState() {
 
 bool Shimmersensor::getStreamingState() {
     return streaming;
+}
+
+bool Shimmersensor::getStreamEnabled() {
+    return stream_enabled;
 }
 
 int Shimmersensor::get_Accel_x() {

@@ -20,6 +20,7 @@ class Shimmersensor {
         SocketClient client;
 
         bool streaming = false;
+        bool stream_enabled = false;
         bool connected = false;
 
         int accel_ln_x;
@@ -47,6 +48,7 @@ class Shimmersensor {
         bool getRunningState();
         bool getConnectedState();
         bool getStreamingState();
+        bool getStreamEnabled();
         
         int get_Accel_x();
         int get_Accel_y();

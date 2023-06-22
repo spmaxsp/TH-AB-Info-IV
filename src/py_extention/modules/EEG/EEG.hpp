@@ -21,6 +21,7 @@ class EEG {
 
         bool state_ready = false;
         bool streaming = false;
+        bool stream_enabled = false;
         bool connected = false;
 
         std::string latest_data_packet;
@@ -28,6 +29,8 @@ class EEG {
         std::vector<std::string> profiles;
 
     public:
+        char profile[20] = "default";
+
         EEG(std::string py_path);
         ~EEG();
 
@@ -53,7 +56,8 @@ class EEG {
         bool getConnectedState();
         bool getInitState();
         bool getStreamingState();
+        bool getStreamEnabled();
 
         std::string getLatestDataPacket();
-        std::vector<std::string> getProfiles();
+        std::vector<const char*> getProfiles();
 };

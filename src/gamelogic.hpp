@@ -16,6 +16,11 @@
 #include <chrono>
 #include <cstdlib>
 
+#define MOVE_NONE 0
+#define MOVE_UP 1
+#define MOVE_DOWN 2
+#define MOVE_LEFT 3
+#define MOVE_RIGHT 4
 
 class GameLogic {
     public:
@@ -31,6 +36,8 @@ class GameLogic {
         Webcam* webcam;
 
         GameLogic(Shimmersensor* shimmersensor, EEG* eeg, Movinghead* movinghead, Webcam* webcam);
+
+        int manual_move = MOVE_NONE;
 
         void startGame();
         void testPythonPath();
@@ -48,11 +55,16 @@ class GameLogic {
         
         std::chrono::steady_clock::time_point shimmer_polling_fence;
 
+        std::chrono::steady_clock::time_point eeg_polling_fence;
+
         int time_to_reach_target = 0;
 
         void setNewTargetPosition();
 
         void updateSensors();
 
+        void makeMovement(int movement);
+
+        int determineMovement();
 };
     

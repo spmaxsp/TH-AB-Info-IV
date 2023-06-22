@@ -31,6 +31,7 @@ COM = sys.argv[4]
 def Handler(pkt: DataPacket) -> None:
     global sensor
     #print(pkt[EChannelType.ACCEL_LN_X])
+    sensor.sensor_con_stat = True
     sensor.accel_ln_x = pkt[EChannelType.ACCEL_LN_X]
     sensor.accel_ln_y = pkt[EChannelType.ACCEL_LN_Y]
     sensor.accel_ln_z = pkt[EChannelType.ACCEL_LN_Z]
@@ -71,12 +72,14 @@ class Shimmersensor:
         shim_dev.add_stream_callback(Handler)
 
         print("Starting streaming...")
+        sensor_con_stat = False
         shim_dev.start_streaming()
 
 
     def StoppeSensor(self):
         print("Stopping sensor...")
         shim_dev.stop_streaming()
+        sensor.sensor_con_stat = False
         shim_dev.shutdown()
 
 async def handle_client(reader, writer):
@@ -90,21 +93,22 @@ async def handle_client(reader, writer):
         global sensor 
         while True:
             if streaming:
-                #print(f"Sending data: x={sensor.accel_ln_x}, y={sensor.accel_ln_y}, z={sensor.accel_ln_z}")
-                pb = proto.DataPacket()
-                pb.state = proto.State.STATE_STREAMING
-                now = datetime.now()
-                pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                pb.accel_ln_x = sensor.accel_ln_x
-                pb.accel_ln_y = sensor.accel_ln_y 
-                pb.accel_ln_z = sensor.accel_ln_z 
-                #print (sensor.accel_ln_x)
-                try:
-                    writer.write(pb.SerializeToString())
-                    await writer.drain()
-                except ConnectionResetError:
-                    print(f"Client {addr} disconnected")
-                    break
+                if sensor.sensor_con_stat:
+                    #print(f"Sending data: x={sensor.accel_ln_x}, y={sensor.accel_ln_y}, z={sensor.accel_ln_z}")
+                    pb = proto.DataPacket()
+                    pb.state = proto.State.STATE_STREAMING
+                    now = datetime.now()
+                    pb.timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+                    pb.accel_ln_x = sensor.accel_ln_x
+                    pb.accel_ln_y = sensor.accel_ln_y 
+                    pb.accel_ln_z = sensor.accel_ln_z 
+                    #print (sensor.accel_ln_x)
+                    try:
+                        writer.write(pb.SerializeToString())
+                        await writer.drain()
+                    except ConnectionResetError:
+                        print(f"Client {addr} disconnected")
+                        break
             await asyncio.sleep(1 / int(RATE))
 
     async def receive_data():
