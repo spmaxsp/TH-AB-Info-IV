@@ -46,6 +46,41 @@ void Webcam::captureImage(){
     cv::cvtColor(this->webcamImage, this->webcamImage, cv::COLOR_BGR2RGBA);
 }
 
+void Webcam::locateMovingHead(){
+    cv::Scalar lower_lila(125, 50, 50);
+    cv::Scalar upper_lila(150, 255, 255);
+
+    // convert image and apply mask
+    cv::Mat hsv;
+    cv::cvtColor(webcamImage, hsv, cv::COLOR_BGR2HSV);
+
+    cv::Mat mask;
+    cv::inRange(hsv, lower_lila, upper_lila, mask);
+
+    // find contours and save biggest one
+    std::vector<std::vector<cv::Point>> contours;
+    cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+    if (!contours.empty()){
+        size_t largest_contour_index = 0;
+        double largest_area = cv::contourArea(contours[0]);
+
+        for (size_t i = 1; i < contours.size(); i++){
+            double area = cv::contourArea(contours[i]);
+            if (area > largest_area)
+            {
+                largest_area = area;
+                largest_contour_index = i;
+            }
+        }
+
+        // calculate center of largest contour
+        cv::Rect bounding_rect = cv::boundingRect(contours[largest_contour_index]);
+        pos_mh_x = bounding_rect.x + bounding_rect.width / 2;
+        pos_mh_y = bounding_rect.y + bounding_rect.height / 2;
+    }
+}
+
 void Webcam::getImage(){
     if (!this->stream_open){
         this->loadDummyImage();

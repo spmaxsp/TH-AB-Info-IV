@@ -19,14 +19,16 @@ private:
     
 public:
     cv::Mat webcamImage;
+    
+    int pos_mh_x;
+    int pos_mh_y;
 
     Webcam(int x, int y);
 
-    std::vector<std::pair<int, std::string>> getAvailableWebcams();
-
     void initDevice(int id);
     void closeDevice();
-
     void getImage();
-    bool isStreamOpen();    
+    void locateMovingHead();
+
+    bool isStreamOpen();  
 };
