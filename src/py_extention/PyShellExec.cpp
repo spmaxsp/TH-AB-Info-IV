@@ -149,9 +149,6 @@ std::string PyShellExec::getOutput(){
         memcpy(log_buffer, ringbuffer, ringbuffer_len);
         log_buffer[ringbuffer_len] = 0;
     }
-    
-    std::cout << "\033[0;32m[PyShellExec]" << "[Buffer " << std::this_thread::get_id() << "]\033[0m " << ringbuffer << std::endl;
-
     return std::string(log_buffer);
 }
 
