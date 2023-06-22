@@ -7,7 +7,7 @@
 bool VulkanContext::CheckLayerSupport(std::vector<const char*> layers) {
     // Check if validation layers are supported
     LOG_INIT_CERR();
-    #ifdef NDEBUG
+    #ifdef _DEBUG
         log.set_log_level(LOG_DEBUG);
     #else
         log.set_log_level(LOG_INFO);

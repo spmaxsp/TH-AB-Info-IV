@@ -19,7 +19,7 @@
     #define Sleep(x) usleep((x)*1000)
 #endif
 
-#define _DEBUG
+//#define _DEBUG
 
 bool handleEvents() {
 	ImGuiIO& io = ImGui::GetIO();
