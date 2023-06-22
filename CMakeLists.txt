@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.26)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -55,6 +55,16 @@ set(SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 
+# if release build disable console
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY WIN32_EXECUTABLE true)
+endif()
+
+# if debug bild set _DEBUG
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE _DEBUG) 
+endif()
+
 #################### LIBRARIES ####################
 
 ### include imgui
@@ -97,10 +107,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE libs/bslogger)
 
 ### JSON (header only)
 target_include_directories(${PROJECT_NAME} PRIVATE libs/json/single_include/nlohmann)
-
-#################### COMPILE OPTIONS ####################
-
-set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 # #################### SHADERS ####################
 
@@ -155,13 +161,17 @@ set(SCRIPT_FILES
 
     ${PROJECT_SOURCE_DIR}/src/kill_python.bat
     ${PROJECT_SOURCE_DIR}/src/kill_python.sh
+
+    ${PROJECT_SOURCE_DIR}/src/py_extention/modules/EEG/rootCA.pem
 )
 
-### Required dlls
-#set(DLL_FILES
-#    
-#)
-
+### Reqired assets
+set(ASSET_FILES
+    ${PROJECT_SOURCE_DIR}/assets/bigmacca.ttf
+    ${PROJECT_SOURCE_DIR}/assets/Guantum.otf
+    ${PROJECT_SOURCE_DIR}/assets/neuropol.otf
+    ${PROJECT_SOURCE_DIR}/assets/splash-bbci.bmp
+) 
 
 ### copy scripts
 add_custom_target(copy_py ALL
@@ -170,10 +180,15 @@ add_custom_target(copy_py ALL
 
 add_dependencies(${PROJECT_NAME} copy_py)
 
-### copy dlls
-#add_custom_target(copy_dll ALL
-#                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DLL_FILES} ${PROJECT_SOURCE_DIR}/bin
-#                    COMMENT "Copying dlls to bin directory" )
-#
-#add_dependencies(${PROJECT_NAME} copy_dll)
+### copy assets
+add_custom_target(copy_assets ALL
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${ASSET_FILES} ${PROJECT_SOURCE_DIR}/bin/assets
+                    COMMENT "Copying Asset files to bin directory" )
 
+add_dependencies(${PROJECT_NAME} copy_assets)
+
+###copy dlls
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND python ./../tools/mingw-bundledlls/mingw-bundledlls --copy $<TARGET_FILE:${PROJECT_NAME}>
+    COMMENT "Copying DLLs..."
+)
